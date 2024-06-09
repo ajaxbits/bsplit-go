@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>bsplit</title>
+    <script src="https://unpkg.com/htmx.org@1.7.0"></script>
+</head>
+
+<body>
+    <h1>Welcome to bsplit</h1>
+    <form hx-post="/split" hx-target="#result" hx-swap="innerHTML">
+        <label for="total">Total Expense:</label>
+        <input type="text" id="total" name="total">
+        <button type="submit">Split</button>
+    </form>
+    <div id="result"></div>
+</body>
+
+</html>
