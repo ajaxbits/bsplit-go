@@ -1,5 +1,5 @@
-module example.com/gomod2nix-template
+module ajaxbits.com/bsplit
 
-go 1.17
+go 1.22
 
 require github.com/mattn/go-sqlite3 v1.14.22 // indirect

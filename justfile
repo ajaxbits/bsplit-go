@@ -3,3 +3,6 @@ fmt:
 
 serve:
     go run .
+
+update-modules:
+    gomod2nix --outdir ./nix
