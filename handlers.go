@@ -5,6 +5,7 @@ import (
 	"log"
     "strconv"
 	"net/http"
+    "math"
 )
 
 var templates = template.Must(template.ParseGlob("templates/*.html"))
@@ -23,9 +24,41 @@ func splitHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+        split := split(total, 3)
+
+        log.Println("Split:", split)
+
 		templates.ExecuteTemplate(w, "result.html", total)
 	} else {
 		log.Println("Split endpoint called without post command")
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	}
+}
+
+func toNearestCent(val float64) float64 {
+    return math.Round(val*100) / 100
+}
+
+func split(amount float64, participants int) []float64 {
+    if participants <= 0 {
+        return []float64{amount}
+    }
+
+    baseAmount := toNearestCent(amount / float64(participants))
+    splits := make([]float64, participants)
+
+    for i := range splits {
+        splits[i] = baseAmount
+    }
+
+    totalAssigned := baseAmount * float64(participants)
+
+    remainingAmount := toNearestCent(amount - totalAssigned)
+
+    for i := 0; remainingAmount > 0 && i < participants; i++ {
+        splits[i] = toNearestCent(splits[i] + 0.01)
+        remainingAmount = toNearestCent(remainingAmount - 0.01)
+    }
+
+    return splits
 }
