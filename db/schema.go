@@ -26,7 +26,7 @@ func createTables(db *sql.DB) error {
             name TEXT NOT NULL
         );`,
 		`CREATE TABLE IF NOT EXISTS Expenses (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id TEXT PRIMARY KEY,
             description TEXT NOT NULL,
             amount REAL NOT NULL,
             date DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -34,7 +34,7 @@ func createTables(db *sql.DB) error {
             FOREIGN KEY (paid_by) REFERENCES Users(id)
         );`,
 		`CREATE TABLE IF NOT EXISTS ExpenseParticipants (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id TEXT PRIMARY KEY,
             expense_id INTEGER,
             user_id INTEGER,
             share REAL,
@@ -42,7 +42,7 @@ func createTables(db *sql.DB) error {
             FOREIGN KEY (user_id) REFERENCES Users(id)
         );`,
 		`CREATE TABLE IF NOT EXISTS Ledgers (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id TEXT PRIMARY KEY,
             from_user_id INTEGER,
             to_user_id INTEGER,
             amount REAL,

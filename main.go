@@ -9,7 +9,7 @@ import (
 func main() {
 	err := db.Initialize()
 	if err != nil {
-        log.Fatal(err)
+		log.Fatal(err)
 	}
 
 	http.HandleFunc("/", rootHandler)
