@@ -5,18 +5,15 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func Initialize() error {
+func Initialize() (*sql.DB, error) {
 	db, err := sql.Open("sqlite3", "./expenses.db")
 	if err != nil {
-		return err
+		return nil, err
 	}
-	defer db.Close()
-
 	if err := createTables(db); err != nil {
-		return err
+		return nil, err
 	}
-
-	return nil
+	return db, nil
 }
 
 func createTables(db *sql.DB) error {
@@ -29,7 +26,7 @@ func createTables(db *sql.DB) error {
             id TEXT PRIMARY KEY,
             description TEXT NOT NULL,
             amount REAL NOT NULL,
-            date DATETIME DEFAULT CURRENT_TIMESTAMP,
+            date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             paid_by INTEGER,
             FOREIGN KEY (paid_by) REFERENCES Users(id)
         );`,

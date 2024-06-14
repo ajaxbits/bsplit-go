@@ -1,42 +1,37 @@
 package main
 
 import (
-	// "log"
 	"math"
 )
 
-func toNearestCent(val float64) float64 {
-	return math.Round(val*100) / 100
-}
-
-func split(amount float64, participants int, splitType SplitType) []float64 {
+func split(amount float64, participants int, splitType SplitType) []int {
 	switch splitType {
 	case Even:
-		return evenSplit(amount, participants)
+		amountCents := int(math.Round(amount * 100))
+		return evenSplit(amountCents, participants)
 	default:
 		panic("Not implemented")
 	}
 }
 
-func evenSplit(amount float64, participants int) []float64 {
+func evenSplit(amount int, participants int) []int {
 	if participants <= 0 {
-		return []float64{amount}
+		return []int{amount}
 	}
 
-	baseAmount := toNearestCent(amount / float64(participants))
-	splits := make([]float64, participants)
+	baseAmount := amount / participants
 
+	splits := make([]int, participants)
 	for i := range splits {
 		splits[i] = baseAmount
 	}
 
-	totalAssigned := baseAmount * float64(participants)
-
-	remainingAmount := toNearestCent(amount - totalAssigned)
+	totalAssigned := baseAmount * participants
+	remainingAmount := amount - totalAssigned
 
 	for i := 0; remainingAmount > 0 && i < participants; i++ {
-		splits[i] = toNearestCent(splits[i] + 0.01)
-		remainingAmount = toNearestCent(remainingAmount - 0.01)
+		splits[i] = splits[i] + 1
+		remainingAmount = remainingAmount - 1
 	}
 
 	return splits
