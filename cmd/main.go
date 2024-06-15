@@ -1,14 +1,14 @@
 package main
 
 import (
-	"ajaxbits.com/bsplit/internal/db"
-	"ajaxbits.com/bsplit/internal/handlers"
-	"ajaxbits.com/bsplit/internal/models"
 	"context"
-	"github.com/google/uuid"
 	"log"
 	"net/http"
 	"time"
+
+	"ajaxbits.com/bsplit/internal/db"
+	"ajaxbits.com/bsplit/internal/handlers"
+	"ajaxbits.com/bsplit/internal/models"
 )
 
 func main() {
@@ -20,32 +20,32 @@ func main() {
 
 	ctx := context.Background()
 
-	userId := uuid.New()
-	log.Println("User ID:", userId.String())
-
-	db.CreateUser(ctx, database, &models.User{ID: userId, Name: "Alex"})
-
-	user, err := db.GetUser(ctx, database, &userId)
+	alice, err := db.CreateUser(ctx, database, "Alice", nil)
 	if err != nil {
 		log.Fatal(err)
 	} else {
-		log.Println(user)
+		log.Println(alice)
 	}
 
-	txn := models.Transaction{
-		ID:          uuid.New(),
-		Description: "A new transaction",
-		Amount:      100 * 100,
-		Date:        time.Now(),
-		PaidBy:      *user,
-	}
-	db.CreateTransaction(ctx, database, &txn)
-
-	transaction, err := db.GetTransaction(ctx, database, txn.ID)
+	bob, err := db.CreateUser(ctx, database, "Bob", nil)
 	if err != nil {
 		log.Fatal(err)
 	} else {
-		log.Println(transaction)
+		log.Println(bob)
+	}
+
+	group, err := db.CreateGroup(ctx, database, "underthecovers", nil, []models.User{*alice, *bob})
+	if err != nil {
+		log.Fatal(err)
+	} else {
+		log.Println(group)
+	}
+
+	tx, err := db.CreateTransaction(ctx, database, "expense", "dinner", 10000, time.Now(), *alice, group, map[models.User]int{*alice: 500, *bob: 500})
+	if err != nil {
+		log.Fatal(err)
+	} else {
+		log.Println(tx)
 	}
 
 	http.HandleFunc("/", handlers.RootHandler)

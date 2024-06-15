@@ -2,4 +2,4 @@
 .direnv
 .envrc
 result
-expenses.db
+expenses.db*
