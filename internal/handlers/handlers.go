@@ -1,35 +1,20 @@
-package main
+package handlers
 
 import (
+	"ajaxbits.com/bsplit/internal/splits"
 	"html/template"
 	"log"
 	"net/http"
 	"strconv"
 )
 
-type SplitType int
-
-const (
-	Even = iota
-	Percent
-	Adjustment
-	Exact
-)
-
-var splitTypeName = map[SplitType]string{
-	Even:       "even",
-	Percent:    "percent",
-	Adjustment: "adjustment",
-	Exact:      "exact",
-}
-
 var templates = template.Must(template.ParseGlob("templates/*.html"))
 
-func rootHandler(w http.ResponseWriter, r *http.Request) {
+func RootHandler(w http.ResponseWriter, r *http.Request) {
 	templates.ExecuteTemplate(w, "home.html", nil)
 }
 
-func splitHandler(w http.ResponseWriter, r *http.Request) {
+func SplitHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		r.ParseForm()
 		totalStr := r.FormValue("total")
@@ -39,7 +24,7 @@ func splitHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		split := split(total, 3, Even)
+		split := splits.Split(total, 3, splits.Even)
 
 		log.Println("Split:", split)
 

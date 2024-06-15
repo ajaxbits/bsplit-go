@@ -1,10 +1,10 @@
-package main
+package splits
 
 import (
 	"math"
 )
 
-func split(amount float64, participants int, splitType SplitType) []int {
+func Split(amount float64, participants int, splitType SplitType) []int {
 	switch splitType {
 	case Even:
 		amountCents := int(math.Round(amount * 100))

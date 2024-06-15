@@ -2,7 +2,7 @@ fmt:
     gofmt -w .
 
 serve:
-    go run .
+    go run ./cmd/.
 
 update-modules:
     gomod2nix --outdir ./nix

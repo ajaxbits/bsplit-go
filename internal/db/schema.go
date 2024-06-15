@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 	_ "github.com/mattn/go-sqlite3"
+	"time"
 )
 
 func Initialize() (*sql.DB, error) {
@@ -10,6 +11,21 @@ func Initialize() (*sql.DB, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	db.SetMaxOpenConns(25)
+	db.SetMaxIdleConns(25)
+	db.SetConnMaxLifetime(5 * time.Minute)
+
+	_, err = db.Exec("PRAGMA journal_mode=WAL;")
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = db.Exec("PRAGMA synchronous=NORMAL;")
+	if err != nil {
+		return nil, err
+	}
+
 	if err := createTables(db); err != nil {
 		return nil, err
 	}
@@ -18,11 +34,12 @@ func Initialize() (*sql.DB, error) {
 
 func createTables(db *sql.DB) error {
 	tables := []string{
-		`CREATE TABLE IF NOT EXISTS Users (
+		`CREATE TABLE IF NOT EXISTS users (
             id TEXT PRIMARY KEY,
-            name TEXT NOT NULL
+            name TEXT NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         );`,
-		`CREATE TABLE IF NOT EXISTS Expenses (
+		`CREATE TABLE IF NOT EXISTS expenses (
             id TEXT PRIMARY KEY,
             description TEXT NOT NULL,
             amount REAL NOT NULL,
@@ -30,7 +47,7 @@ func createTables(db *sql.DB) error {
             paid_by INTEGER,
             FOREIGN KEY (paid_by) REFERENCES Users(id)
         );`,
-		`CREATE TABLE IF NOT EXISTS ExpenseParticipants (
+		`CREATE TABLE IF NOT EXISTS expense_participants (
             id TEXT PRIMARY KEY,
             expense_id INTEGER,
             user_id INTEGER,
@@ -38,7 +55,7 @@ func createTables(db *sql.DB) error {
             FOREIGN KEY (expense_id) REFERENCES Expenses(id),
             FOREIGN KEY (user_id) REFERENCES Users(id)
         );`,
-		`CREATE TABLE IF NOT EXISTS Ledgers (
+		`CREATE TABLE IF NOT EXISTS ledgers (
             id TEXT PRIMARY KEY,
             from_user_id INTEGER,
             to_user_id INTEGER,
