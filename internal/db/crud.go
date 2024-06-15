@@ -41,35 +41,44 @@ func GetUser(ctx context.Context, db *sql.DB, id *uuid.UUID) (*models.User, erro
 	return user, nil
 }
 
-// Create a new transaction
-// func CreateTransaction(ctx context.Context, db *sql.DB, transaction *models.Transaction) error {
-// 	tx, err := db.BeginTx(ctx, nil)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	defer tx.Rollback()
-//
-// 	query := `INSERT INTO transactions (user_id, amount, created_at) VALUES (?, ?, ?)`
-// 	result, err := tx.ExecContext(ctx, query, transaction.UserID, transaction.Amount, transaction.CreatedAt)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	id, err := result.LastInsertId()
-// 	if err != nil {
-// 		return err
-// 	}
-// 	transaction.ID = id
-//
-// 	return tx.Commit()
-// }
+func CreateTransaction(ctx context.Context, db *sql.DB, transaction *models.Transaction) error {
+	tx, err := db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
 
-// Get a transaction by ID
-// func GetTransaction(ctx context.Context, db *sql.DB, id int64) (*models.Transaction, error) {
-// 	transaction := &models.Transaction{}
-// 	query := `SELECT id, user_id, amount, created_at FROM transactions WHERE id = ?`
-// 	err := db.QueryRowContext(ctx, query, id).Scan(&transaction.ID, &transaction.UserID, &transaction.Amount, &transaction.CreatedAt)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return transaction, nil
-// }
+	query := `INSERT INTO transactions (id, description, amount, date, paid_by) VALUES (?, ?, ?, ?, ?)`
+	_, err = tx.ExecContext(ctx, query, transaction.ID.String(), transaction.Description, transaction.Amount, transaction.Date, transaction.PaidBy.ID.String())
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit()
+}
+
+func GetTransaction(ctx context.Context, db *sql.DB, id uuid.UUID) (*models.Transaction, error) {
+	transaction := &models.Transaction{}
+	var transactionIDStr, paidByIDStr string
+
+	query := `SELECT id, description, amount, date, paid_by FROM transactions WHERE id = ?`
+
+	err := db.QueryRowContext(ctx, query, id.String()).Scan(&transactionIDStr, &transaction.Description, &transaction.Amount, &transaction.Date, &paidByIDStr)
+	if err != nil {
+		return nil, err
+	}
+
+	transactionID, err := uuid.Parse(transactionIDStr)
+	if err != nil {
+		return nil, err
+	}
+	transaction.ID = transactionID
+
+	paidByID, err := uuid.Parse(paidByIDStr)
+	if err != nil {
+		return nil, err
+	}
+	transaction.PaidBy.ID = paidByID
+
+	return transaction, nil
+}

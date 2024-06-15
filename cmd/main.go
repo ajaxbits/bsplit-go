@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"log"
 	"net/http"
+	"time"
 )
 
 func main() {
@@ -29,6 +30,22 @@ func main() {
 		log.Fatal(err)
 	} else {
 		log.Println(user)
+	}
+
+	txn := models.Transaction{
+		ID:          uuid.New(),
+		Description: "A new transaction",
+		Amount:      100 * 100,
+		Date:        time.Now(),
+		PaidBy:      *user,
+	}
+	db.CreateTransaction(ctx, database, &txn)
+
+	transaction, err := db.GetTransaction(ctx, database, txn.ID)
+	if err != nil {
+		log.Fatal(err)
+	} else {
+		log.Println(transaction)
 	}
 
 	http.HandleFunc("/", handlers.RootHandler)

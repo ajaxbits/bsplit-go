@@ -37,31 +37,31 @@ func createTables(db *sql.DB) error {
 		`CREATE TABLE IF NOT EXISTS users (
             id TEXT PRIMARY KEY,
             name TEXT NOT NULL,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );`,
-		`CREATE TABLE IF NOT EXISTS expenses (
+		`CREATE TABLE IF NOT EXISTS transactions (
             id TEXT PRIMARY KEY,
             description TEXT NOT NULL,
-            amount REAL NOT NULL,
-            date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            amount INTEGER NOT NULL,
+            date TIMESTAMP NOT NULL,
             paid_by INTEGER,
-            FOREIGN KEY (paid_by) REFERENCES Users(id)
+            FOREIGN KEY (paid_by) REFERENCES users(id)
         );`,
 		`CREATE TABLE IF NOT EXISTS expense_participants (
             id TEXT PRIMARY KEY,
             expense_id INTEGER,
             user_id INTEGER,
-            share REAL,
-            FOREIGN KEY (expense_id) REFERENCES Expenses(id),
-            FOREIGN KEY (user_id) REFERENCES Users(id)
+            share INTEGER,
+            FOREIGN KEY (expense_id) REFERENCES transactions(id),
+            FOREIGN KEY (user_id) REFERENCES users(id)
         );`,
 		`CREATE TABLE IF NOT EXISTS ledgers (
             id TEXT PRIMARY KEY,
             from_user_id INTEGER,
             to_user_id INTEGER,
-            amount REAL,
-            FOREIGN KEY (from_user_id) REFERENCES Users(id),
-            FOREIGN KEY (to_user_id) REFERENCES Users(id)
+            amount INTEGER,
+            FOREIGN KEY (from_user_id) REFERENCES users(id),
+            FOREIGN KEY (to_user_id) REFERENCES users(id)
         );`,
 	}
 

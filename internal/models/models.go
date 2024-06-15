@@ -11,7 +11,7 @@ type User struct {
 	CreatedAt time.Time
 }
 
-type Expense struct {
+type Transaction struct {
 	ID          uuid.UUID
 	Description string
 	Amount      int64
