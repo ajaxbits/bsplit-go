@@ -48,6 +48,18 @@ func main() {
 		log.Println(tx)
 	}
 
+	debts, err := db.GetDebts(ctx, database, []models.User{*alice, *bob}, group)
+	if err != nil {
+		log.Fatal(err)
+	} else {
+		for debtor, debtMap := range *debts {
+			log.Printf("user %s owes the following:", debtor.Name)
+			for creditor, amount := range debtMap {
+				log.Printf("  %s: $%.2f", creditor.Name, float64(amount)/100)
+			}
+		}
+	}
+
 	http.HandleFunc("/", handlers.RootHandler)
 	http.HandleFunc("/split", handlers.SplitHandler)
 	log.Println("Starting bsplit server on :8080")
