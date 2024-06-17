@@ -7,7 +7,6 @@ package dbc
 
 import (
 	"context"
-	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
@@ -28,9 +27,9 @@ insert into Groups (
 `
 
 type CreateGroupParams struct {
-	ID          uuid.UUID      `json:"id"`
-	Name        string         `json:"name"`
-	Description sql.NullString `json:"description"`
+	ID          uuid.UUID `json:"id"`
+	Name        string    `json:"name"`
+	Description *string   `json:"description"`
 }
 
 func (q *Queries) CreateGroup(ctx context.Context, arg CreateGroupParams) (Group, error) {
@@ -116,9 +115,9 @@ insert into Users (
 `
 
 type CreateUserParams struct {
-	ID      uuid.UUID      `json:"id"`
-	Name    string         `json:"name"`
-	VenmoID sql.NullString `json:"venmo_id"`
+	ID      uuid.UUID `json:"id"`
+	Name    string    `json:"name"`
+	VenmoID *string   `json:"venmo_id"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {

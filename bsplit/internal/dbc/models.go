@@ -5,17 +5,16 @@
 package dbc
 
 import (
-	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
 )
 
 type Group struct {
-	ID          uuid.UUID      `json:"id"`
-	CreatedAt   sql.NullTime   `json:"created_at"`
-	Name        string         `json:"name"`
-	Description sql.NullString `json:"description"`
+	ID          uuid.UUID  `json:"id"`
+	CreatedAt   *time.Time `json:"created_at"`
+	Name        string     `json:"name"`
+	Description *string    `json:"description"`
 }
 
 type GroupMember struct {
@@ -25,14 +24,14 @@ type GroupMember struct {
 }
 
 type Transaction struct {
-	ID          uuid.UUID    `json:"id"`
-	CreatedAt   sql.NullTime `json:"created_at"`
-	Type        string       `json:"type"`
-	Description string       `json:"description"`
-	Amount      int64        `json:"amount"`
-	Date        time.Time    `json:"date"`
-	PaidBy      uuid.UUID    `json:"paid_by"`
-	GroupID     uuid.UUID    `json:"group_id"`
+	ID          uuid.UUID  `json:"id"`
+	CreatedAt   *time.Time `json:"created_at"`
+	Type        string     `json:"type"`
+	Description string     `json:"description"`
+	Amount      int64      `json:"amount"`
+	Date        time.Time  `json:"date"`
+	PaidBy      uuid.UUID  `json:"paid_by"`
+	GroupID     uuid.UUID  `json:"group_id"`
 }
 
 type TransactionParticipant struct {
@@ -43,8 +42,8 @@ type TransactionParticipant struct {
 }
 
 type User struct {
-	ID        uuid.UUID      `json:"id"`
-	CreatedAt sql.NullTime   `json:"created_at"`
-	Name      string         `json:"name"`
-	VenmoID   sql.NullString `json:"venmo_id"`
+	ID        uuid.UUID  `json:"id"`
+	CreatedAt *time.Time `json:"created_at"`
+	Name      string     `json:"name"`
+	VenmoID   *string    `json:"venmo_id"`
 }
