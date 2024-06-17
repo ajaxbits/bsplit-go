@@ -1,0 +1,20 @@
+version: "2"
+sql:
+  - engine: "sqlite"
+    queries: "query.sql"
+    schema: "schema.sql"
+    gen:
+      go:
+        package: "dbc"
+        out: "bsplit/internal/dbc"
+        emit_json_tags: true
+        overrides:
+          - db_type: "BLOB"
+            go_type:
+              import: "github.com/google/uuid"
+              type: "UUID"
+          - column: "Transactions.group_id"
+            nullable: true
+            go_type:
+              import: "github.com/google/uuid"
+              type: "UUID"

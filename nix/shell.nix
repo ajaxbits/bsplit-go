@@ -27,5 +27,6 @@ in
         go-tools
         sqlite-interactive
         just
+        sqlc
       ]);
   }

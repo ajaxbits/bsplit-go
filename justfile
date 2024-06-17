@@ -9,3 +9,6 @@ update-modules:
 
 clean:
     rm -fr ./expenses.db*
+
+gen:
+    sqlc generate
