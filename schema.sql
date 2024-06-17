@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS Transactions (
     , description TEXT NOT NULL
     , amount INTEGER NOT NULL
     , date TIMESTAMP NOT NULL
-    , paid_by INTEGER NOT NULL
+    , paid_by BLOB NOT NULL
     , group_id BLOB
     , FOREIGN KEY (paid_by) REFERENCES Users(id)
     , FOREIGN KEY (group_id) REFERENCES Groups(id)

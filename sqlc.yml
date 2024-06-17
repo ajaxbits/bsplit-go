@@ -9,12 +9,24 @@ sql:
         out: "bsplit/internal/dbc"
         emit_json_tags: true
         overrides:
-          - db_type: "BLOB"
+          - column: "*.id"
+            go_type:
+              import: "github.com/google/uuid"
+              type: "UUID"
+          - column: "Group*.*_id"
+            go_type:
+              import: "github.com/google/uuid"
+              type: "UUID"
+          - column: "Transactions.paid_by"
             go_type:
               import: "github.com/google/uuid"
               type: "UUID"
           - column: "Transactions.group_id"
             nullable: true
+            go_type:
+              import: "github.com/google/uuid"
+              type: "UUID"
+          - column: "TransactionParticipants.*_id"
             go_type:
               import: "github.com/google/uuid"
               type: "UUID"

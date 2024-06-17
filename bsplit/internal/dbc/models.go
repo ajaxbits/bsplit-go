@@ -31,7 +31,7 @@ type Transaction struct {
 	Description string       `json:"description"`
 	Amount      int64        `json:"amount"`
 	Date        time.Time    `json:"date"`
-	PaidBy      int64        `json:"paid_by"`
+	PaidBy      uuid.UUID    `json:"paid_by"`
 	GroupID     uuid.UUID    `json:"group_id"`
 }
 

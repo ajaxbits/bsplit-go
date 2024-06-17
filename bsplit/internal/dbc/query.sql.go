@@ -7,7 +7,133 @@ package dbc
 
 import (
 	"context"
+	"strings"
+	"time"
+
+	"github.com/google/uuid"
 )
+
+const createTransaction = `-- name: CreateTransaction :one
+INSERT INTO Transactions (
+    id
+    , created_at
+    , type
+    , description
+    , amount
+    , date
+    , paid_by
+    , group_id
+) VALUES (
+    ?1
+    , CURRENT_TIMESTAMP
+    , ?2
+    , ?3
+    , ?4
+    , ?5
+    , ?6
+    , ?7
+) RETURNING id, created_at, type, description, amount, date, paid_by, group_id
+`
+
+type CreateTransactionParams struct {
+	ID          uuid.UUID `json:"id"`
+	Type        string    `json:"type"`
+	Description string    `json:"description"`
+	Amount      int64     `json:"amount"`
+	Date        time.Time `json:"date"`
+	PaidBy      uuid.UUID `json:"paid_by"`
+	GroupID     uuid.UUID `json:"group_id"`
+}
+
+func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionParams) (Transaction, error) {
+	row := q.db.QueryRowContext(ctx, createTransaction,
+		arg.ID,
+		arg.Type,
+		arg.Description,
+		arg.Amount,
+		arg.Date,
+		arg.PaidBy,
+		arg.GroupID,
+	)
+	var i Transaction
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.Type,
+		&i.Description,
+		&i.Amount,
+		&i.Date,
+		&i.PaidBy,
+		&i.GroupID,
+	)
+	return i, err
+}
+
+const getDebts = `-- name: GetDebts :many
+WITH net_owed AS (
+    SELECT 
+        tp1.user_id AS debtor,
+        t.paid_by AS creditor,
+        SUM(tp1.share) AS amount_owed
+    FROM
+        TransactionParticipants tp1
+    JOIN
+        Transactions t ON tp1.txn_id = t.id
+    WHERE
+        t.type = 'expense' AND tp1.user_id IN (/*SLICE:users*/?)
+    GROUP BY
+        tp1.user_id, t.paid_by
+) 
+SELECT 
+    n1.debtor,
+    n1.creditor,
+    n1.amount_owed - COALESCE(n2.amount_owed, 0) AS net_amount
+FROM
+    net_owed n1
+LEFT JOIN
+    net_owed n2 ON n1.debtor = n2.creditor AND n1.creditor = n2.debtor
+WHERE
+    n1.amount_owed > COALESCE(n2.amount_owed, 0)
+`
+
+type GetDebtsRow struct {
+	Debtor    []byte `json:"debtor"`
+	Creditor  []byte `json:"creditor"`
+	NetAmount int64  `json:"net_amount"`
+}
+
+func (q *Queries) GetDebts(ctx context.Context, users []uuid.UUID) ([]GetDebtsRow, error) {
+	query := getDebts
+	var queryParams []interface{}
+	if len(users) > 0 {
+		for _, v := range users {
+			queryParams = append(queryParams, v)
+		}
+		query = strings.Replace(query, "/*SLICE:users*/?", strings.Repeat(",?", len(users))[1:], 1)
+	} else {
+		query = strings.Replace(query, "/*SLICE:users*/?", "NULL", 1)
+	}
+	rows, err := q.db.QueryContext(ctx, query, queryParams...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetDebtsRow
+	for rows.Next() {
+		var i GetDebtsRow
+		if err := rows.Scan(&i.Debtor, &i.Creditor, &i.NetAmount); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
 
 const getUsers = `-- name: GetUsers :many
 SELECT
