@@ -28,7 +28,7 @@ func CreateUser(ctx context.Context, db *sql.DB, name string, venmoID *string) (
 	defer tx.Rollback()
 
 	query := `INSERT INTO Users (id, created_at, name, venmo_id) VALUES (?, CURRENT_TIMESTAMP, ?, ?) RETURNING created_at`
-	err = tx.QueryRowContext(ctx, query, user.ID.String(), user.Name, user.VenmoID).Scan(&user.CreatedAt)
+    err = tx.QueryRowContext(ctx, query, user.ID[:], user.Name, user.VenmoID).Scan(&user.CreatedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +45,7 @@ func GetUser(ctx context.Context, db *sql.DB, id *uuid.UUID) (*models.User, erro
 	user := &models.User{}
 	query := `SELECT id, name, created_at FROM Users WHERE id = ?`
 	var uuidStr string
-	err := db.QueryRowContext(ctx, query, id.String()).Scan(&uuidStr, &user.Name, &user.CreatedAt)
+	err := db.QueryRowContext(ctx, query, id[:]).Scan(&uuidStr, &user.Name, &user.CreatedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +67,7 @@ func UpdateUser(ctx context.Context, db *sql.DB, user *models.User) error {
 	defer tx.Rollback()
 
 	query := `UPDATE Users SET name = ? WHERE id = ?`
-	_, err = tx.ExecContext(ctx, query, user.Name, user.ID.String())
+	_, err = tx.ExecContext(ctx, query, user.Name, user.ID[:])
 	if err != nil {
 		return err
 	}
@@ -95,7 +95,7 @@ func CreateGroup(ctx context.Context, db *sql.DB, name string, description *stri
 	defer tx.Rollback()
 
 	query := `INSERT INTO Groups (id, created_at, name, description) VALUES (?, CURRENT_TIMESTAMP, ?, ?) RETURNING created_at`
-	err = tx.QueryRowContext(ctx, query, group.ID.String(), group.Name, group.Description).Scan(&group.CreatedAt)
+	err = tx.QueryRowContext(ctx, query, group.ID[:], group.Name, group.Description).Scan(&group.CreatedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -107,7 +107,7 @@ func CreateGroup(ctx context.Context, db *sql.DB, name string, description *stri
 		}
 
 		query := `INSERT INTO GroupMembers (id, group_id, user_id) VALUES (?, ?, ?)`
-		if _, err = tx.ExecContext(ctx, query, groupMembersUUID, group.ID.String(), member.ID.String()); err != nil {
+		if _, err = tx.ExecContext(ctx, query, groupMembersUUID, group.ID[:], member.ID[:]); err != nil {
 			return nil, err
 		}
 	}
@@ -124,7 +124,7 @@ func GetGroup(ctx context.Context, db *sql.DB, id *uuid.UUID) (*models.Group, er
 	group := &models.Group{}
 	query := `SELECT id, name, created_at FROM Users WHERE id = ?`
 	var uuidStr string
-	err := db.QueryRowContext(ctx, query, id.String()).Scan(&uuidStr, &group.Name, &group.CreatedAt)
+	err := db.QueryRowContext(ctx, query, id[:]).Scan(&uuidStr, &group.Name, &group.CreatedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -162,7 +162,7 @@ func CreateTransaction(ctx context.Context, db *sql.DB, txnType string, desc str
 	defer dbTx.Rollback()
 
 	query := `INSERT INTO Transactions (id, created_at, type, description, amount, date, paid_by, group_id) VALUES (?, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?) RETURNING created_at`
-	err = dbTx.QueryRowContext(ctx, query, tx.ID.String(), tx.Type, tx.Description, tx.Amount, tx.Date, tx.PaidBy.ID.String(), tx.Group.ID.String()).Scan(&tx.CreatedAt)
+	err = dbTx.QueryRowContext(ctx, query, tx.ID[:], tx.Type, tx.Description, tx.Amount, tx.Date, tx.PaidBy.ID[:], tx.Group.ID[:]).Scan(&tx.CreatedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -173,7 +173,7 @@ func CreateTransaction(ctx context.Context, db *sql.DB, txnType string, desc str
 			return nil, err
 		}
 		query := `INSERT INTO TransactionParticipants (id, txn_id, user_id, share) VALUES (?, ?, ?, ?)`
-		if _, err = dbTx.ExecContext(ctx, query, transactionParticipantsUUID, tx.ID.String(), participant.ID.String(), share); err != nil {
+		if _, err = dbTx.ExecContext(ctx, query, transactionParticipantsUUID, tx.ID[:], participant.ID[:], share); err != nil {
 			return nil, err
 		}
 	}
@@ -192,7 +192,7 @@ func GetTransaction(ctx context.Context, db *sql.DB, id uuid.UUID) (*models.Tran
 
 	query := `SELECT id, description, amount, date, paid_by FROM transactions WHERE id = ?`
 
-	err := db.QueryRowContext(ctx, query, id.String()).Scan(&transactionIDStr, &transaction.Description, &transaction.Amount, &transaction.Date, &paidByIDStr)
+	err := db.QueryRowContext(ctx, query, id[:]).Scan(&transactionIDStr, &transaction.Description, &transaction.Amount, &transaction.Date, &paidByIDStr)
 	if err != nil {
 		return nil, err
 	}

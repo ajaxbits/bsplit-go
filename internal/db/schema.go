@@ -35,26 +35,26 @@ func Initialize() (*sql.DB, error) {
 func createTables(db *sql.DB) error {
 	tables := []string{
 		`CREATE TABLE IF NOT EXISTS Users (
-            id TEXT PRIMARY KEY NOT NULL UNIQUE,
+            id BLOB PRIMARY KEY NOT NULL UNIQUE,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             name TEXT NOT NULL,
             venmo_id TEXT
         );`,
 		`CREATE TABLE IF NOT EXISTS Groups (
-            id TEXT PRIMARY KEY NOT NULL UNIQUE,
+            id BLOB PRIMARY KEY NOT NULL UNIQUE,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             name TEXT NOT NULL,
             description TEXT
         );`,
 		`CREATE TABLE IF NOT EXISTS GroupMembers (
-            id TEXT PRIMARY KEY NOT NULL UNIQUE,
+            id BLOB PRIMARY KEY NOT NULL UNIQUE,
             group_id TEXT NOT NULL,
             user_id TEXT NOT NULL,
             FOREIGN KEY (group_id) REFERENCES Groups(id),
             FOREIGN KEY (user_id) REFERENCES Users(id)
         );`,
 		`CREATE TABLE IF NOT EXISTS Transactions (
-            id TEXT PRIMARY KEY NOT NULL UNIQUE,
+            id BLOB PRIMARY KEY NOT NULL UNIQUE,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             type TEXT CHECK(type IN ('expense', 'settle')) NOT NULL,
             description TEXT NOT NULL,
@@ -66,7 +66,7 @@ func createTables(db *sql.DB) error {
             FOREIGN KEY (group_id) REFERENCES Groups(id)
         );`,
 		`CREATE TABLE IF NOT EXISTS TransactionParticipants (
-            id TEXT PRIMARY KEY NOT NULL UNIQUE,
+            id BLOB PRIMARY KEY NOT NULL UNIQUE,
             txn_id INTEGER NOT NULL,
             user_id INTEGER NOT NULL,
             share INTEGER NOT NULL,
