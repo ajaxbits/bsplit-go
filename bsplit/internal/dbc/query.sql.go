@@ -7,14 +7,46 @@ package dbc
 
 import (
 	"context"
-	"strings"
+	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
 )
 
+const createGroup = `-- name: CreateGroup :one
+insert into Groups (
+    id
+    , created_at
+    , name
+    , description
+) values (
+    ?1
+    , current_timestamp
+    , ?2
+    , ?3
+) returning id, created_at, name, description
+`
+
+type CreateGroupParams struct {
+	ID          uuid.UUID      `json:"id"`
+	Name        string         `json:"name"`
+	Description sql.NullString `json:"description"`
+}
+
+func (q *Queries) CreateGroup(ctx context.Context, arg CreateGroupParams) (Group, error) {
+	row := q.db.QueryRowContext(ctx, createGroup, arg.ID, arg.Name, arg.Description)
+	var i Group
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.Name,
+		&i.Description,
+	)
+	return i, err
+}
+
 const createTransaction = `-- name: CreateTransaction :one
-INSERT INTO Transactions (
+insert into Transactions (
     id
     , created_at
     , type
@@ -23,16 +55,16 @@ INSERT INTO Transactions (
     , date
     , paid_by
     , group_id
-) VALUES (
+) values (
     ?1
-    , CURRENT_TIMESTAMP
+    , current_timestamp
     , ?2
     , ?3
     , ?4
     , ?5
     , ?6
     , ?7
-) RETURNING id, created_at, type, description, amount, date, paid_by, group_id
+) returning id, created_at, type, description, amount, date, paid_by, group_id
 `
 
 type CreateTransactionParams struct {
@@ -69,59 +101,82 @@ func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionPa
 	return i, err
 }
 
-const getDebts = `-- name: GetDebts :many
-WITH net_owed AS (
-    SELECT 
-        tp1.user_id AS debtor,
-        t.paid_by AS creditor,
-        SUM(tp1.share) AS amount_owed
-    FROM
-        TransactionParticipants tp1
-    JOIN
-        Transactions t ON tp1.txn_id = t.id
-    WHERE
-        t.type = 'expense' AND tp1.user_id IN (/*SLICE:users*/?)
-    GROUP BY
-        tp1.user_id, t.paid_by
-) 
-SELECT 
-    n1.debtor,
-    n1.creditor,
-    n1.amount_owed - COALESCE(n2.amount_owed, 0) AS net_amount
-FROM
-    net_owed n1
-LEFT JOIN
-    net_owed n2 ON n1.debtor = n2.creditor AND n1.creditor = n2.debtor
-WHERE
-    n1.amount_owed > COALESCE(n2.amount_owed, 0)
+const createUser = `-- name: CreateUser :one
+insert into Users (
+    id
+    , created_at
+    , name
+    , venmo_id
+) values (
+    ?1
+    , current_timestamp
+    , ?2
+    , ?3
+) returning id, created_at, name, venmo_id
 `
 
-type GetDebtsRow struct {
-	Debtor    []byte `json:"debtor"`
-	Creditor  []byte `json:"creditor"`
-	NetAmount int64  `json:"net_amount"`
+type CreateUserParams struct {
+	ID      uuid.UUID      `json:"id"`
+	Name    string         `json:"name"`
+	VenmoID sql.NullString `json:"venmo_id"`
 }
 
-func (q *Queries) GetDebts(ctx context.Context, users []uuid.UUID) ([]GetDebtsRow, error) {
-	query := getDebts
-	var queryParams []interface{}
-	if len(users) > 0 {
-		for _, v := range users {
-			queryParams = append(queryParams, v)
-		}
-		query = strings.Replace(query, "/*SLICE:users*/?", strings.Repeat(",?", len(users))[1:], 1)
-	} else {
-		query = strings.Replace(query, "/*SLICE:users*/?", "NULL", 1)
-	}
-	rows, err := q.db.QueryContext(ctx, query, queryParams...)
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
+	row := q.db.QueryRowContext(ctx, createUser, arg.ID, arg.Name, arg.VenmoID)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.Name,
+		&i.VenmoID,
+	)
+	return i, err
+}
+
+const deleteGroup = `-- name: DeleteGroup :exec
+delete from Groups
+where
+    id = ?1
+`
+
+func (q *Queries) DeleteGroup(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deleteGroup, id)
+	return err
+}
+
+const deleteUser = `-- name: DeleteUser :exec
+delete from Users
+where
+    id = ?1
+`
+
+func (q *Queries) DeleteUser(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deleteUser, id)
+	return err
+}
+
+const getAllGroups = `-- name: GetAllGroups :many
+select
+    id, created_at, name, description
+from
+    Groups
+`
+
+func (q *Queries) GetAllGroups(ctx context.Context) ([]Group, error) {
+	rows, err := q.db.QueryContext(ctx, getAllGroups)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetDebtsRow
+	var items []Group
 	for rows.Next() {
-		var i GetDebtsRow
-		if err := rows.Scan(&i.Debtor, &i.Creditor, &i.NetAmount); err != nil {
+		var i Group
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.Name,
+			&i.Description,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -135,15 +190,15 @@ func (q *Queries) GetDebts(ctx context.Context, users []uuid.UUID) ([]GetDebtsRo
 	return items, nil
 }
 
-const getUsers = `-- name: GetUsers :many
-SELECT
+const getAllUsers = `-- name: GetAllUsers :many
+select
     id, created_at, name, venmo_id
-FROM
+from
     Users
 `
 
-func (q *Queries) GetUsers(ctx context.Context) ([]User, error) {
-	rows, err := q.db.QueryContext(ctx, getUsers)
+func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
+	rows, err := q.db.QueryContext(ctx, getAllUsers)
 	if err != nil {
 		return nil, err
 	}
@@ -168,4 +223,46 @@ func (q *Queries) GetUsers(ctx context.Context) ([]User, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const getGroup = `-- name: GetGroup :one
+select
+    id, created_at, name, description
+from
+    Groups
+where
+    id = ?1
+`
+
+func (q *Queries) GetGroup(ctx context.Context, id uuid.UUID) (Group, error) {
+	row := q.db.QueryRowContext(ctx, getGroup, id)
+	var i Group
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.Name,
+		&i.Description,
+	)
+	return i, err
+}
+
+const getUser = `-- name: GetUser :one
+select
+    id, created_at, name, venmo_id
+from
+    Users
+where
+    id = ?1
+`
+
+func (q *Queries) GetUser(ctx context.Context, id uuid.UUID) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUser, id)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.Name,
+		&i.VenmoID,
+	)
+	return i, err
 }
