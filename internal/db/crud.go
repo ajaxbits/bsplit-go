@@ -10,8 +10,13 @@ import (
 )
 
 func CreateUser(ctx context.Context, db *sql.DB, name string, venmoID *string) (*models.User, error) {
+	userUUID, err := uuid.NewV7()
+	if err != nil {
+		return nil, err
+	}
+
 	user := &models.User{
-		ID:      uuid.New(),
+		ID:      userUUID,
 		Name:    name,
 		VenmoID: venmoID,
 	}
@@ -71,8 +76,13 @@ func UpdateUser(ctx context.Context, db *sql.DB, user *models.User) error {
 }
 
 func CreateGroup(ctx context.Context, db *sql.DB, name string, description *string, members []models.User) (*models.Group, error) {
+	groupUUID, err := uuid.NewV7()
+	if err != nil {
+		return nil, err
+	}
+
 	group := &models.Group{
-		ID:          uuid.New(),
+		ID:          groupUUID,
 		Name:        name,
 		Description: description,
 		Members:     members,
@@ -91,9 +101,13 @@ func CreateGroup(ctx context.Context, db *sql.DB, name string, description *stri
 	}
 
 	for _, member := range group.Members {
-		query := `INSERT INTO GroupMembers (id, group_id, user_id) VALUES (?, ?, ?)`
-		_, err := tx.ExecContext(ctx, query, uuid.New(), group.ID.String(), member.ID.String())
+		groupMembersUUID, err := uuid.NewV7()
 		if err != nil {
+			return nil, err
+		}
+
+		query := `INSERT INTO GroupMembers (id, group_id, user_id) VALUES (?, ?, ?)`
+		if _, err = tx.ExecContext(ctx, query, groupMembersUUID, group.ID.String(), member.ID.String()); err != nil {
 			return nil, err
 		}
 	}
@@ -125,8 +139,13 @@ func GetGroup(ctx context.Context, db *sql.DB, id *uuid.UUID) (*models.Group, er
 }
 
 func CreateTransaction(ctx context.Context, db *sql.DB, txnType string, desc string, amt int, date time.Time, paidBy models.User, group *models.Group, participants map[models.User]int) (*models.Transaction, error) {
+	transactionUUID, err := uuid.NewV7()
+	if err != nil {
+		return nil, err
+	}
+
 	tx := &models.Transaction{
-		ID:           uuid.New(),
+		ID:           transactionUUID,
 		Type:         txnType,
 		Description:  desc,
 		Amount:       amt,
@@ -149,9 +168,12 @@ func CreateTransaction(ctx context.Context, db *sql.DB, txnType string, desc str
 	}
 
 	for participant, share := range tx.Participants {
-		query := `INSERT INTO TransactionParticipants (id, txn_id, user_id, share) VALUES (?, ?, ?, ?)`
-		_, err := dbTx.ExecContext(ctx, query, uuid.New(), tx.ID.String(), participant.ID.String(), share)
+		transactionParticipantsUUID, err := uuid.NewV7()
 		if err != nil {
+			return nil, err
+		}
+		query := `INSERT INTO TransactionParticipants (id, txn_id, user_id, share) VALUES (?, ?, ?, ?)`
+		if _, err = dbTx.ExecContext(ctx, query, transactionParticipantsUUID, tx.ID.String(), participant.ID.String(), share); err != nil {
 			return nil, err
 		}
 	}
