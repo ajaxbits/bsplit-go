@@ -1,11 +1,11 @@
 -- name: CreateUser :one
 insert into Users (
-    id
+    uuid
     , created_at
     , name
     , venmo_id
 ) values (
-    @id
+    @uuid
     , current_timestamp
     , @name
     , @venmo_id
@@ -17,7 +17,7 @@ select
 from
     Users
 where
-    id = @id;
+    uuid = @uuid;
 
 -- name: GetAllUsers :many
 select
@@ -28,18 +28,18 @@ from
 -- name: DeleteUser :exec
 delete from Users
 where
-    id = @id;
+    uuid = @uuid;
 
 
 
 -- name: CreateGroup :one
 insert into Groups (
-    id
+    uuid
     , created_at
     , name
     , description
 ) values (
-    @id
+    @uuid
     , current_timestamp
     , @name
     , @description
@@ -51,7 +51,7 @@ select
 from
     Groups
 where
-    id = @id;
+    uuid = @uuid;
 
 -- name: GetAllGroups :many
 select
@@ -62,43 +62,43 @@ from
 -- name: DeleteGroup :exec
 delete from Groups
 where
-    id = @id;
+    uuid = @uuid;
 
 
 
 -- name: CreateTransactionRaw :one
 insert into Transactions (
-    id
+    uuid
     , created_at
     , type
     , description
     , amount
     , date
     , paid_by
-    , group_id
+    , group_uuid
 ) values (
-    @id
+    @uuid
     , current_timestamp
     , @type
     , @description
     , @amount
     , @date
     , @paid_by
-    , @group_id
+    , @group_uuid
 ) returning *;
 
 
 
 -- name: CreateTransactionParticipants :one
 insert into TransactionParticipants (
-    id
-    , txn_id
-    , user_id
+    uuid
+    , txn_uuid
+    , user_uuid
     , share
 ) values (
-    @id
-    , @txn_id
-    , @user_id
+    @uuid
+    , @txn_uuid
+    , @user_uuid
     , @share
 ) returning *;
 
@@ -106,18 +106,18 @@ insert into TransactionParticipants (
 -- name: GetDebts :many
 with net_owed as (
     select 
-        tp.user_id as debtor
+        tp.user_uuid as debtor
         , t.paid_by as creditor
         , SUM(tp.share) as amount_owed
     from
         TransactionParticipants tp
     join
-        Transactions t on tp.txn_id = t.id
+        Transactions t on tp.txn_uuid = t.uuid
     where
         t.type = 'expense' 
-        and tp.user_id <> t.paid_by
+        and tp.user_uuid <> t.paid_by
     group by
-        tp.user_id, t.paid_by
+        tp.user_uuid, t.paid_by
 ),
 aggregate_net_owed as (
     select
@@ -134,12 +134,12 @@ aggregate_net_owed as (
         debtor_net_owed.debtor, debtor_net_owed.creditor
 )
 select 
-    debtor
-    , creditor
+    debtor as debtor_uuid
+    , creditor as creditor_uuid
     , cast(net_amount as integer)
 from 
     aggregate_net_owed
 where
     net_amount > 0
 order by 
-    debtor, creditor;
+    debtor_uuid, creditor_uuid;

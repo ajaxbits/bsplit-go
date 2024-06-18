@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"log"
+    _ "embed"
 
 	// "net/http"
 	"time"
@@ -14,8 +16,11 @@ import (
 	"ajaxbits.com/bsplit/internal/models"
 )
 
+//go:embed schema.sql
+var ddl string
+
 func main() {
-	database, err := db.Initialize()
+	database, err := sql.Open("sqlite3", "./expenses.db")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -24,7 +29,21 @@ func main() {
 	ctx := context.Background()
 	queries := dbc.New(database)
 
+	if _, err := database.ExecContext(ctx, ddl); err != nil {
+		log.Fatal(err)
+	}
+
+	// aliceUuid, err := uuid.NewV7()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
 	alice, err := db.CreateUser(ctx, database, "Alice", nil)
+	// alice, err := queries.CreateUser(ctx, dbc.CreateUserParams{
+	// 	ID:      aliceUuid[:],
+	// 	Name:    "Alice",
+	// 	VenmoID: nil,
+	// })
 	if err != nil {
 		log.Fatal(err)
 	} else {
@@ -65,11 +84,11 @@ func main() {
 	}
 
 	for _, debt := range debts {
-		debtor, err := queries.GetUser(ctx, debt.Debtor)
+		debtor, err := queries.GetUser(ctx, debt.DebtorUuid)
 		if err != nil {
 			log.Fatal(err)
 		}
-		creditor, err := queries.GetUser(ctx, debt.Creditor)
+		creditor, err := queries.GetUser(ctx, debt.CreditorUuid)
 		if err != nil {
 			log.Fatal(err)
 		}

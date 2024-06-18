@@ -27,7 +27,7 @@ func CreateUser(ctx context.Context, db *sql.DB, name string, venmoID *string) (
 	}
 	defer tx.Rollback()
 
-	query := `INSERT INTO Users (id, created_at, name, venmo_id) VALUES (?, CURRENT_TIMESTAMP, ?, ?) RETURNING created_at`
+	query := `INSERT INTO Users (uuid, created_at, name, venmo_id) VALUES (?, CURRENT_TIMESTAMP, ?, ?) RETURNING created_at`
     err = tx.QueryRowContext(ctx, query, user.ID[:], user.Name, user.VenmoID).Scan(&user.CreatedAt)
 	if err != nil {
 		return nil, err
@@ -94,7 +94,7 @@ func CreateGroup(ctx context.Context, db *sql.DB, name string, description *stri
 	}
 	defer tx.Rollback()
 
-	query := `INSERT INTO Groups (id, created_at, name, description) VALUES (?, CURRENT_TIMESTAMP, ?, ?) RETURNING created_at`
+	query := `INSERT INTO Groups (uuid, created_at, name, description) VALUES (?, CURRENT_TIMESTAMP, ?, ?) RETURNING created_at`
 	err = tx.QueryRowContext(ctx, query, group.ID[:], group.Name, group.Description).Scan(&group.CreatedAt)
 	if err != nil {
 		return nil, err
@@ -106,7 +106,7 @@ func CreateGroup(ctx context.Context, db *sql.DB, name string, description *stri
 			return nil, err
 		}
 
-		query := `INSERT INTO GroupMembers (id, group_id, user_id) VALUES (?, ?, ?)`
+		query := `INSERT INTO GroupMembers (uuid, group_uuid, user_uuid) VALUES (?, ?, ?)`
 		if _, err = tx.ExecContext(ctx, query, groupMembersUUID, group.ID[:], member.ID[:]); err != nil {
 			return nil, err
 		}
@@ -161,7 +161,7 @@ func CreateTransaction(ctx context.Context, db *sql.DB, txnType string, desc str
 	}
 	defer dbTx.Rollback()
 
-	query := `INSERT INTO Transactions (id, created_at, type, description, amount, date, paid_by, group_id) VALUES (?, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?) RETURNING created_at`
+	query := `INSERT INTO Transactions (uuid, created_at, type, description, amount, date, paid_by, group_uuid) VALUES (?, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?) RETURNING created_at`
 	err = dbTx.QueryRowContext(ctx, query, tx.ID[:], tx.Type, tx.Description, tx.Amount, tx.Date, tx.PaidBy.ID[:], tx.Group.ID[:]).Scan(&tx.CreatedAt)
 	if err != nil {
 		return nil, err
@@ -172,7 +172,7 @@ func CreateTransaction(ctx context.Context, db *sql.DB, txnType string, desc str
 		if err != nil {
 			return nil, err
 		}
-		query := `INSERT INTO TransactionParticipants (id, txn_id, user_id, share) VALUES (?, ?, ?, ?)`
+		query := `INSERT INTO TransactionParticipants (uuid, txn_uuid, user_uuid, share) VALUES (?, ?, ?, ?)`
 		if _, err = dbTx.ExecContext(ctx, query, transactionParticipantsUUID, tx.ID[:], participant.ID[:], share); err != nil {
 			return nil, err
 		}

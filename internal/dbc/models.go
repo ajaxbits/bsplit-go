@@ -9,38 +9,38 @@ import (
 )
 
 type GroupMember struct {
-	ID      []byte `json:"id"`
-	GroupID []byte `json:"group_id"`
-	UserID  []byte `json:"user_id"`
+	Uuid      []byte `json:"uuid"`
+	GroupUuid []byte `json:"group_uuid"`
+	UserUuid  []byte `json:"user_uuid"`
 }
 
 type GroupRaw struct {
-	ID          []byte     `json:"id"`
+	Uuid        []byte     `json:"uuid"`
 	CreatedAt   *time.Time `json:"created_at"`
 	Name        string     `json:"name"`
 	Description *string    `json:"description"`
 }
 
 type TransactionParticipant struct {
-	ID     []byte `json:"id"`
-	TxnID  []byte `json:"txn_id"`
-	UserID []byte `json:"user_id"`
-	Share  int64  `json:"share"`
+	Uuid     []byte `json:"uuid"`
+	TxnUuid  []byte `json:"txn_uuid"`
+	UserUuid []byte `json:"user_uuid"`
+	Share    int64  `json:"share"`
 }
 
 type TransactionRaw struct {
-	ID          []byte     `json:"id"`
+	Uuid        []byte     `json:"uuid"`
 	CreatedAt   *time.Time `json:"created_at"`
 	Type        string     `json:"type"`
 	Description string     `json:"description"`
 	Amount      int64      `json:"amount"`
 	Date        time.Time  `json:"date"`
 	PaidBy      []byte     `json:"paid_by"`
-	GroupID     []byte     `json:"group_id"`
+	GroupUuid   []byte     `json:"group_uuid"`
 }
 
 type User struct {
-	ID        []byte     `json:"id"`
+	Uuid      []byte     `json:"uuid"`
 	CreatedAt *time.Time `json:"created_at"`
 	Name      string     `json:"name"`
 	VenmoID   *string    `json:"venmo_id"`

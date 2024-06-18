@@ -1,43 +1,43 @@
-CREATE TABLE IF NOT EXISTS Users (
-    id BLOB PRIMARY KEY NOT NULL UNIQUE
-    , created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    , name TEXT NOT NULL
-    , venmo_id TEXT
+create table if not exists Users (
+    uuid blob primary key not null unique
+    , created_at timestamp default current_timestamp
+    , name text not null
+    , venmo_id text
 );
 
-CREATE TABLE IF NOT EXISTS Groups (
-    id BLOB PRIMARY KEY NOT NULL UNIQUE
-    , created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    , name TEXT NOT NULL
-    , description TEXT
+create table if not exists Groups (
+    uuid blob primary key not null unique
+    , created_at timestamp default current_timestamp
+    , name text not null
+    , description text
 );
 
-CREATE TABLE IF NOT EXISTS GroupMembers (
-    id BLOB PRIMARY KEY NOT NULL UNIQUE
-    , group_id BLOB NOT NULL
-    , user_id BLOB NOT NULL
-    , FOREIGN KEY (group_id) REFERENCES Groups(id)
-    , FOREIGN KEY (user_id) REFERENCES Users(id)
+create table if not exists GroupMembers (
+    uuid blob primary key not null unique
+    , group_uuid blob not null
+    , user_uuid blob not null
+    , foreign key (group_uuid) references groups(id)
+    , foreign key (user_uuid) references users(id)
 );
 
-CREATE TABLE IF NOT EXISTS Transactions (
-    id BLOB PRIMARY KEY NOT NULL UNIQUE
-    , created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    , type TEXT CHECK(type IN ('expense', 'settle')) NOT NULL
-    , description TEXT NOT NULL
-    , amount INTEGER NOT NULL
-    , date TIMESTAMP NOT NULL
-    , paid_by BLOB NOT NULL
-    , group_id BLOB
-    , FOREIGN KEY (paid_by) REFERENCES Users(id)
-    , FOREIGN KEY (group_id) REFERENCES Groups(id)
+create table if not exists Transactions (
+    uuid blob primary key not null unique
+    , created_at timestamp default current_timestamp
+    , type text check(type in ('expense', 'settle')) not null
+    , description text not null
+    , amount integer not null
+    , date timestamp not null
+    , paid_by blob not null
+    , group_uuid blob
+    , foreign key (paid_by) references users(id)
+    , foreign key (group_uuid) references groups(id)
 );
 
-CREATE TABLE IF NOT EXISTS TransactionParticipants (
-    id BLOB PRIMARY KEY NOT NULL UNIQUE
-    , txn_id BLOB NOT NULL
-    , user_id BLOB NOT NULL
-    , share INTEGER NOT NULL
-    , FOREIGN KEY (txn_id) REFERENCES Transactions(id)
-    , FOREIGN KEY (user_id) REFERENCES Users(id)
+create table if not exists TransactionParticipants (
+    uuid blob primary key not null unique
+    , txn_uuid blob not null
+    , user_uuid blob not null
+    , share integer not null
+    , foreign key (txn_uuid) references transactions(id)
+    , foreign key (user_uuid) references users(id)
 );
