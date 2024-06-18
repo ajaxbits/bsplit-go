@@ -1,0 +1,25 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Splitter</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://unpkg.com/htmx.org@2.0.0"
+        integrity="sha384-wS5l5IKJBvK6sPTKa2WZ1js3d947pvWXbPJ1OmWfEuxLgeHcEbjUUA5i9V5ZkpCw"
+        crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <h1>Expense Splitter</h1>
+    <button id="addTransactionBtn" hx-get="http://localhost:8080/modal-add-transaction.html" hx-target="#modalContainer">Add
+        Transaction</button>
+
+    <div id="modalContainer"></div>
+
+    <script src="scripts.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,10 @@
+<!-- modal-select-split.html -->
+<div class="modal">
+    <div class="modal-content">
+        <span class="close" hx-get="http://localhost:8080/close-modal.html" hx-target="#splitTypeModal">&times;</span>
+        <h2>Select Split Type</h2>
+        <button hx-get="http://localhost:8080/modal-split-equally.html" hx-target="#splitDetails">Split Equally</button>
+        <button hx-get="http://localhost:8080/modal-split-exact.html" hx-target="#splitDetails">Split Exactly</button>
+        <div id="splitDetails"></div>
+    </div>
+</div>
