@@ -64,14 +64,14 @@ func main() {
 		log.Println(group)
 	}
 
-	tx, err := db.CreateTransaction(ctx, database, "expense", "dinner", 1000, time.Now(), *alice, group, map[models.User]int{*alice: 500, *bob: 500})
+	tx, err := db.CreateTransaction(ctx, database, "expense", "dinner", 1000, time.Now().UTC(), *alice, group, map[models.User]int{*alice: 500, *bob: 500})
 	if err != nil {
 		log.Fatal(err)
 	} else {
 		log.Println(tx)
 	}
 
-	tx2, err := db.CreateTransaction(ctx, database, "expense", "new car", 2000, time.Now(), *bob, group, map[models.User]int{*alice: 1000, *bob: 1000})
+	tx2, err := db.CreateTransaction(ctx, database, "expense", "new car", 2000, time.Now().UTC(), *bob, group, map[models.User]int{*alice: 1000, *bob: 1000})
 	if err != nil {
 		log.Fatal(err)
 	} else {
