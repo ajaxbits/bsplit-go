@@ -42,6 +42,62 @@ func (q *Queries) CreateGroup(ctx context.Context, arg CreateGroupParams) (Group
 	return i, err
 }
 
+const createTransaction = `-- name: CreateTransaction :one
+insert into Transactions (
+    uuid
+    , created_at
+    , type
+    , description
+    , amount
+    , date
+    , paid_by
+    , group_uuid
+) values (
+    ?1
+    , current_timestamp
+    , ?2
+    , ?3
+    , ?4
+    , ?5
+    , ?6
+    , ?7
+) returning uuid, created_at, type, description, amount, date, paid_by, group_uuid
+`
+
+type CreateTransactionParams struct {
+	Uuid        string    `json:"uuid"`
+	Type        string    `json:"type"`
+	Description string    `json:"description"`
+	Amount      int64     `json:"amount"`
+	Date        time.Time `json:"date"`
+	PaidBy      string    `json:"paid_by"`
+	GroupUuid   *string   `json:"group_uuid"`
+}
+
+func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionParams) (Transaction, error) {
+	row := q.db.QueryRowContext(ctx, createTransaction,
+		arg.Uuid,
+		arg.Type,
+		arg.Description,
+		arg.Amount,
+		arg.Date,
+		arg.PaidBy,
+		arg.GroupUuid,
+	)
+	var i Transaction
+	err := row.Scan(
+		&i.Uuid,
+		&i.CreatedAt,
+		&i.Type,
+		&i.Description,
+		&i.Amount,
+		&i.Date,
+		&i.PaidBy,
+		&i.GroupUuid,
+	)
+	return i, err
+}
+
 const createTransactionParticipants = `-- name: CreateTransactionParticipants :one
 insert into TransactionParticipants (
     uuid
@@ -76,62 +132,6 @@ func (q *Queries) CreateTransactionParticipants(ctx context.Context, arg CreateT
 		&i.TxnUuid,
 		&i.UserUuid,
 		&i.Share,
-	)
-	return i, err
-}
-
-const createTransactionRaw = `-- name: CreateTransactionRaw :one
-insert into Transactions (
-    uuid
-    , created_at
-    , type
-    , description
-    , amount
-    , date
-    , paid_by
-    , group_uuid
-) values (
-    ?1
-    , current_timestamp
-    , ?2
-    , ?3
-    , ?4
-    , ?5
-    , ?6
-    , ?7
-) returning uuid, created_at, type, description, amount, date, paid_by, group_uuid
-`
-
-type CreateTransactionRawParams struct {
-	Uuid        string    `json:"uuid"`
-	Type        string    `json:"type"`
-	Description string    `json:"description"`
-	Amount      int64     `json:"amount"`
-	Date        time.Time `json:"date"`
-	PaidBy      string    `json:"paid_by"`
-	GroupUuid   *string   `json:"group_uuid"`
-}
-
-func (q *Queries) CreateTransactionRaw(ctx context.Context, arg CreateTransactionRawParams) (Transaction, error) {
-	row := q.db.QueryRowContext(ctx, createTransactionRaw,
-		arg.Uuid,
-		arg.Type,
-		arg.Description,
-		arg.Amount,
-		arg.Date,
-		arg.PaidBy,
-		arg.GroupUuid,
-	)
-	var i Transaction
-	err := row.Scan(
-		&i.Uuid,
-		&i.CreatedAt,
-		&i.Type,
-		&i.Description,
-		&i.Amount,
-		&i.Date,
-		&i.PaidBy,
-		&i.GroupUuid,
 	)
 	return i, err
 }

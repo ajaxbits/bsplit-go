@@ -66,7 +66,7 @@ where
 
 
 
--- name: CreateTransactionRaw :one
+-- name: CreateTransaction :one
 insert into Transactions (
     uuid
     , created_at

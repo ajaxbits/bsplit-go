@@ -3,17 +3,17 @@ package main
 import (
 	"context"
 	"database/sql"
+	_ "github.com/mattn/go-sqlite3"
 	_ "embed"
 	"log"
 
 	// "net/http"
 	"time"
 
-	"ajaxbits.com/bsplit/internal/db"
 	"ajaxbits.com/bsplit/internal/dbc"
+	"github.com/google/uuid"
 
 	// "ajaxbits.com/bsplit/internal/handlers"
-	"ajaxbits.com/bsplit/internal/models"
 )
 
 //go:embed schema.sql
@@ -33,50 +33,140 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// aliceUuid, err := uuid.NewV7()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	aliceUuid, err := uuid.NewV7()
+	if err != nil {
+		log.Fatal(err)
+	}
+	bobUuid, err := uuid.NewV7()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	alice, err := db.CreateUser(ctx, database, "Alice", nil)
-	// alice, err := queries.CreateUser(ctx, dbc.CreateUserParams{
-	// 	ID:      aliceUuid[:],
-	// 	Name:    "Alice",
-	// 	VenmoID: nil,
-	// })
+	alice, err := queries.CreateUser(ctx, dbc.CreateUserParams{
+		Uuid:    aliceUuid.String(),
+		Name:    "Alice",
+		VenmoID: nil,
+	})
 	if err != nil {
 		log.Fatal(err)
 	} else {
 		log.Println(alice)
 	}
 
-	bob, err := db.CreateUser(ctx, database, "Bob", nil)
+	bob, err := queries.CreateUser(ctx, dbc.CreateUserParams{
+		Uuid:    bobUuid.String(),
+		Name:    "Bob",
+		VenmoID: nil,
+	})
 	if err != nil {
 		log.Fatal(err)
 	} else {
 		log.Println(bob)
 	}
 
-	group, err := db.CreateGroup(ctx, database, "underthecovers", nil, []models.User{*alice, *bob})
+	groupUuid, err := uuid.NewV7()
+	if err != nil {
+		log.Fatal(err)
+	}
+	groupDescription := "Alice and Bob are in love!"
+
+	group, err := queries.CreateGroup(ctx, dbc.CreateGroupParams{
+		Uuid:        groupUuid.String(),
+		Name:        "Lovers",
+		Description: &groupDescription,
+	})
 	if err != nil {
 		log.Fatal(err)
 	} else {
 		log.Println(group)
 	}
 
-	tx, err := db.CreateTransaction(ctx, database, "expense", "dinner", 1000, time.Now().UTC(), *alice, group, map[models.User]int{*alice: 500, *bob: 500})
+	txUuid1, err := uuid.NewV7()
 	if err != nil {
 		log.Fatal(err)
-	} else {
-		log.Println(tx)
+	}
+	txUuid2, err := uuid.NewV7()
+	if err != nil {
+		log.Fatal(err)
+	}
+    tpUuid1, err := uuid.NewV7()
+	if err != nil {
+		log.Fatal(err)
+	}
+	tpUuid2, err := uuid.NewV7()
+	if err != nil {
+		log.Fatal(err)
+	}
+	tpUuid3, err := uuid.NewV7()
+	if err != nil {
+		log.Fatal(err)
+	}
+	tpUuid4, err := uuid.NewV7()
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	tx2, err := db.CreateTransaction(ctx, database, "expense", "new car", 2000, time.Now().UTC(), *bob, group, map[models.User]int{*alice: 1000, *bob: 1000})
+	tx1, err := queries.CreateTransaction(ctx, dbc.CreateTransactionParams{
+		Uuid:        txUuid1.String(),
+		Type:        "expense",
+		Description: "dinner",
+		Amount:      1000,
+		Date:        time.Now().UTC(),
+		PaidBy:      alice.Uuid,
+		GroupUuid:   nil,
+	})
 	if err != nil {
 		log.Fatal(err)
-	} else {
-		log.Println(tx2)
 	}
+
+
+    if _, err = queries.CreateTransactionParticipants(ctx, dbc.CreateTransactionParticipantsParams{
+        Uuid: tpUuid1.String(),
+        TxnUuid: tx1.Uuid,
+        UserUuid: alice.Uuid,
+        Share: 500,
+    }); err != nil {
+        log.Fatal(err)
+    }
+    if _, err = queries.CreateTransactionParticipants(ctx, dbc.CreateTransactionParticipantsParams{
+        Uuid: tpUuid2.String(),
+        TxnUuid: tx1.Uuid,
+        UserUuid: bob.Uuid,
+        Share: 500,
+    }); err != nil {
+        log.Fatal(err)
+    }
+
+	tx2, err := queries.CreateTransaction(ctx, dbc.CreateTransactionParams{
+		Uuid:        txUuid2.String(),
+		Type:        "expense",
+		Description: "new car",
+		Amount:      5000,
+		Date:        time.Now().UTC(),
+		PaidBy:      bob.Uuid,
+		GroupUuid:   nil,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+    if _, err = queries.CreateTransactionParticipants(ctx, dbc.CreateTransactionParticipantsParams{
+        Uuid: tpUuid3.String(),
+        TxnUuid: tx2.Uuid,
+        UserUuid: alice.Uuid,
+        Share: 2000,
+    }); err != nil {
+        log.Fatal(err)
+    }
+    if _, err = queries.CreateTransactionParticipants(ctx, dbc.CreateTransactionParticipantsParams{
+        Uuid: tpUuid4.String(),
+        TxnUuid: tx2.Uuid,
+        UserUuid: bob.Uuid,
+        Share: 2000,
+    }); err != nil {
+        log.Fatal(err)
+    }
+
 
 	debts, err := queries.GetDebts(ctx)
 	if err != nil {

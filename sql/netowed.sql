@@ -3,19 +3,19 @@ SELECT * from TransactionParticipants;
 
 with NetOwed as (
     select 
-        tp.user_id as debtor
+        tp.user_uuid as debtor
         , t.paid_by as creditor
         , SUM(tp.share) as amount_owed
     from
         TransactionParticipants tp
     join
-        Transactions t on tp.txn_id = t.id
+        Transactions t on tp.txn_uuid = t.uuid
     where
         t.type = 'expense' 
-        and tp.user_id <> t.paid_by
-        -- and tp.group_id = @group_id
+        and tp.user_uuid <> t.paid_by
+        -- and tp.group_uuid = @group_uuid
     group by
-        tp.user_id, t.paid_by
+        tp.user_uuid, t.paid_by
 ),
 AggregateNetOwed as (
     select
