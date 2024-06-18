@@ -108,7 +108,7 @@ with net_owed as (
     select 
         tp.user_uuid as debtor
         , t.paid_by as creditor
-        , SUM(tp.share) as amount_owed
+        , sum(tp.share) as amount_owed
     from
         TransactionParticipants tp
     join
@@ -122,7 +122,7 @@ with net_owed as (
     select
         debtor_net_owed.debtor
         , debtor_net_owed.creditor
-        , SUM(debtor_net_owed.amount_owed - COALESCE(creditor_net_owed.amount_owed, 0)) as net_amount
+        , sum(debtor_net_owed.amount_owed - coalesce(creditor_net_owed.amount_owed, 0)) as net_amount
     from
         net_owed debtor_net_owed
     left join
