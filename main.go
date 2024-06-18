@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"database/sql"
+	_ "embed"
 	"log"
-    _ "embed"
 
 	// "net/http"
 	"time"
@@ -84,11 +84,11 @@ func main() {
 	}
 
 	for _, debt := range debts {
-		debtor, err := queries.GetUser(ctx, debt.DebtorUuid)
+		debtor, err := queries.GetUser(ctx, debt.Debtor)
 		if err != nil {
 			log.Fatal(err)
 		}
-		creditor, err := queries.GetUser(ctx, debt.CreditorUuid)
+		creditor, err := queries.GetUser(ctx, debt.Creditor)
 		if err != nil {
 			log.Fatal(err)
 		}

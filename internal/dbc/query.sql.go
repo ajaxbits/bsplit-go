@@ -25,14 +25,14 @@ insert into Groups (
 `
 
 type CreateGroupParams struct {
-	Uuid        []byte  `json:"uuid"`
+	Uuid        string  `json:"uuid"`
 	Name        string  `json:"name"`
 	Description *string `json:"description"`
 }
 
-func (q *Queries) CreateGroup(ctx context.Context, arg CreateGroupParams) (GroupRaw, error) {
+func (q *Queries) CreateGroup(ctx context.Context, arg CreateGroupParams) (Group, error) {
 	row := q.db.QueryRowContext(ctx, createGroup, arg.Uuid, arg.Name, arg.Description)
-	var i GroupRaw
+	var i Group
 	err := row.Scan(
 		&i.Uuid,
 		&i.CreatedAt,
@@ -57,9 +57,9 @@ insert into TransactionParticipants (
 `
 
 type CreateTransactionParticipantsParams struct {
-	Uuid     []byte `json:"uuid"`
-	TxnUuid  []byte `json:"txn_uuid"`
-	UserUuid []byte `json:"user_uuid"`
+	Uuid     string `json:"uuid"`
+	TxnUuid  string `json:"txn_uuid"`
+	UserUuid string `json:"user_uuid"`
 	Share    int64  `json:"share"`
 }
 
@@ -103,16 +103,16 @@ insert into Transactions (
 `
 
 type CreateTransactionRawParams struct {
-	Uuid        []byte    `json:"uuid"`
+	Uuid        string    `json:"uuid"`
 	Type        string    `json:"type"`
 	Description string    `json:"description"`
 	Amount      int64     `json:"amount"`
 	Date        time.Time `json:"date"`
-	PaidBy      []byte    `json:"paid_by"`
-	GroupUuid   []byte    `json:"group_uuid"`
+	PaidBy      string    `json:"paid_by"`
+	GroupUuid   *string   `json:"group_uuid"`
 }
 
-func (q *Queries) CreateTransactionRaw(ctx context.Context, arg CreateTransactionRawParams) (TransactionRaw, error) {
+func (q *Queries) CreateTransactionRaw(ctx context.Context, arg CreateTransactionRawParams) (Transaction, error) {
 	row := q.db.QueryRowContext(ctx, createTransactionRaw,
 		arg.Uuid,
 		arg.Type,
@@ -122,7 +122,7 @@ func (q *Queries) CreateTransactionRaw(ctx context.Context, arg CreateTransactio
 		arg.PaidBy,
 		arg.GroupUuid,
 	)
-	var i TransactionRaw
+	var i Transaction
 	err := row.Scan(
 		&i.Uuid,
 		&i.CreatedAt,
@@ -151,7 +151,7 @@ insert into Users (
 `
 
 type CreateUserParams struct {
-	Uuid    []byte  `json:"uuid"`
+	Uuid    string  `json:"uuid"`
 	Name    string  `json:"name"`
 	VenmoID *string `json:"venmo_id"`
 }
@@ -174,7 +174,7 @@ where
     uuid = ?1
 `
 
-func (q *Queries) DeleteGroup(ctx context.Context, uuid []byte) error {
+func (q *Queries) DeleteGroup(ctx context.Context, uuid string) error {
 	_, err := q.db.ExecContext(ctx, deleteGroup, uuid)
 	return err
 }
@@ -185,7 +185,7 @@ where
     uuid = ?1
 `
 
-func (q *Queries) DeleteUser(ctx context.Context, uuid []byte) error {
+func (q *Queries) DeleteUser(ctx context.Context, uuid string) error {
 	_, err := q.db.ExecContext(ctx, deleteUser, uuid)
 	return err
 }
@@ -197,15 +197,15 @@ from
     Groups
 `
 
-func (q *Queries) GetAllGroups(ctx context.Context) ([]GroupRaw, error) {
+func (q *Queries) GetAllGroups(ctx context.Context) ([]Group, error) {
 	rows, err := q.db.QueryContext(ctx, getAllGroups)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GroupRaw
+	var items []Group
 	for rows.Next() {
-		var i GroupRaw
+		var i Group
 		if err := rows.Scan(
 			&i.Uuid,
 			&i.CreatedAt,
@@ -275,8 +275,7 @@ with net_owed as (
         and tp.user_uuid <> t.paid_by
     group by
         tp.user_uuid, t.paid_by
-),
-aggregate_net_owed as (
+), aggregate_net_owed as (
     select
         debtor_net_owed.debtor
         , debtor_net_owed.creditor
@@ -291,21 +290,19 @@ aggregate_net_owed as (
         debtor_net_owed.debtor, debtor_net_owed.creditor
 )
 select 
-    debtor as debtor_uuid
-    , creditor as creditor_uuid
+    debtor
+    , creditor
     , cast(net_amount as integer)
 from 
     aggregate_net_owed
 where
     net_amount > 0
-order by 
-    debtor_uuid, creditor_uuid
 `
 
 type GetDebtsRow struct {
-	DebtorUuid   []byte `json:"debtor_uuid"`
-	CreditorUuid []byte `json:"creditor_uuid"`
-	NetAmount    int64  `json:"net_amount"`
+	Debtor    string `json:"debtor"`
+	Creditor  string `json:"creditor"`
+	NetAmount int64  `json:"net_amount"`
 }
 
 func (q *Queries) GetDebts(ctx context.Context) ([]GetDebtsRow, error) {
@@ -317,7 +314,7 @@ func (q *Queries) GetDebts(ctx context.Context) ([]GetDebtsRow, error) {
 	var items []GetDebtsRow
 	for rows.Next() {
 		var i GetDebtsRow
-		if err := rows.Scan(&i.DebtorUuid, &i.CreditorUuid, &i.NetAmount); err != nil {
+		if err := rows.Scan(&i.Debtor, &i.Creditor, &i.NetAmount); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -340,9 +337,9 @@ where
     uuid = ?1
 `
 
-func (q *Queries) GetGroup(ctx context.Context, uuid []byte) (GroupRaw, error) {
+func (q *Queries) GetGroup(ctx context.Context, uuid string) (Group, error) {
 	row := q.db.QueryRowContext(ctx, getGroup, uuid)
-	var i GroupRaw
+	var i Group
 	err := row.Scan(
 		&i.Uuid,
 		&i.CreatedAt,
@@ -361,7 +358,7 @@ where
     uuid = ?1
 `
 
-func (q *Queries) GetUser(ctx context.Context, uuid []byte) (User, error) {
+func (q *Queries) GetUser(ctx context.Context, uuid string) (User, error) {
 	row := q.db.QueryRowContext(ctx, getUser, uuid)
 	var i User
 	err := row.Scan(

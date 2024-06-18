@@ -118,8 +118,7 @@ with net_owed as (
         and tp.user_uuid <> t.paid_by
     group by
         tp.user_uuid, t.paid_by
-),
-aggregate_net_owed as (
+), aggregate_net_owed as (
     select
         debtor_net_owed.debtor
         , debtor_net_owed.creditor
@@ -134,12 +133,10 @@ aggregate_net_owed as (
         debtor_net_owed.debtor, debtor_net_owed.creditor
 )
 select 
-    debtor as debtor_uuid
-    , creditor as creditor_uuid
+    debtor
+    , creditor
     , cast(net_amount as integer)
 from 
     aggregate_net_owed
 where
-    net_amount > 0
-order by 
-    debtor_uuid, creditor_uuid;
+    net_amount > 0;
