@@ -66,7 +66,7 @@ where
 
 
 
--- name: CreateTransaction :one
+-- name: CreateTransactionRaw :one
 insert into Transactions (
     id
     , created_at
@@ -89,3 +89,57 @@ insert into Transactions (
 
 
 
+-- name: CreateTransactionParticipants :one
+insert into TransactionParticipants (
+    id
+    , txn_id
+    , user_id
+    , share
+) values (
+    @id
+    , @txn_id
+    , @user_id
+    , @share
+) returning *;
+
+
+-- name: GetDebts :many
+with net_owed as (
+    select 
+        tp.user_id as debtor
+        , t.paid_by as creditor
+        , SUM(tp.share) as amount_owed
+    from
+        TransactionParticipants tp
+    join
+        Transactions t on tp.txn_id = t.id
+    where
+        t.type = 'expense' 
+        and tp.user_id <> t.paid_by
+    group by
+        tp.user_id, t.paid_by
+),
+aggregate_net_owed as (
+    select
+        debtor_net_owed.debtor
+        , debtor_net_owed.creditor
+        , SUM(debtor_net_owed.amount_owed - COALESCE(creditor_net_owed.amount_owed, 0)) as net_amount
+    from
+        net_owed debtor_net_owed
+    left join
+        net_owed creditor_net_owed 
+        on debtor_net_owed.debtor = creditor_net_owed.creditor 
+        and debtor_net_owed.creditor = creditor_net_owed.debtor
+    group by
+        debtor_net_owed.debtor, debtor_net_owed.creditor
+)
+select 
+    debtor
+    , creditor
+    , cast(net_amount as integer)
+from 
+    aggregate_net_owed
+where
+    net_amount > 0
+order by 
+    debtor, creditor;
