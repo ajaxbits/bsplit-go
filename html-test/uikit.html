@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Splitter</title>
+
+    <script src="https://unpkg.com/htmx.org@2.0.0/dist/htmx.js" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+    <!-- <script src=" https://cdn.jsdelivr.net/npm/uikit@3.21.5/dist/js/uikit.min.js "></script> -->
+    <link href=" https://cdn.jsdelivr.net/npm/uikit@3.21.5/dist/css/uikit.min.css " rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+
+</head>
+
+<body class="">
+    <button id="showButton" hx-get="http://localhost:8080/uikit-modal.html" hx-target="#modals-here" class="uk-button uk-button-primary"
+        _="on htmx:afterOnLoad wait 10ms then add .uk-open to #modal">Open Modal</button>
+
+    <div id="modals-here"></div>
+</body>
+
+</html>
