@@ -3,16 +3,18 @@ package main
 import (
 	"context"
 	"database/sql"
-	_ "github.com/mattn/go-sqlite3"
 	_ "embed"
 	"log"
+	"net/url"
+	"runtime"
+
+	_ "github.com/mattn/go-sqlite3"
 
 	// "net/http"
 	"time"
 
 	"ajaxbits.com/bsplit/internal/dbc"
 	"github.com/google/uuid"
-
 	// "ajaxbits.com/bsplit/internal/handlers"
 )
 
@@ -20,16 +22,37 @@ import (
 var ddl string
 
 func main() {
-	database, err := sql.Open("sqlite3", "./expenses.db")
+
+	// https://kerkour.com/sqlite-for-servers
+	dbConnectionUrlParams := make(url.Values)
+	dbConnectionUrlParams.Add("_txlock", "immediate")
+	dbConnectionUrlParams.Add("_journal_mode", "WAL")
+	dbConnectionUrlParams.Add("_busy_timeout", "5000")
+	dbConnectionUrlParams.Add("_synchronous", "NORMAL")
+	dbConnectionUrlParams.Add("_cache_size", "1000000000")
+	dbConnectionUrlParams.Add("_foreign_keys", "true")
+	dbConnectionUrlParams.Add("_temp_store", "memory")
+	dbConnectionUrl := "file:expenses.db?" + dbConnectionUrlParams.Encode()
+
+	writeDb, err := sql.Open("sqlite3", dbConnectionUrl)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer database.Close()
+	defer writeDb.Close()
+	writeDb.SetMaxOpenConns(1)
+
+	readDb, err := sql.Open("sqlite3", dbConnectionUrl)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer writeDb.Close()
+	readDb.SetMaxOpenConns(max(4, runtime.NumCPU()))
 
 	ctx := context.Background()
-	queries := dbc.New(database)
+	writeQueries := dbc.New(writeDb)
+	readQueries := dbc.New(readDb)
 
-	if _, err := database.ExecContext(ctx, ddl); err != nil {
+	if _, err := writeDb.ExecContext(ctx, ddl); err != nil {
 		log.Fatal(err)
 	}
 
@@ -42,7 +65,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	alice, err := queries.CreateUser(ctx, dbc.CreateUserParams{
+	alice, err := writeQueries.CreateUser(ctx, dbc.CreateUserParams{
 		Uuid:    aliceUuid.String(),
 		Name:    "Alice",
 		VenmoID: nil,
@@ -53,7 +76,7 @@ func main() {
 		log.Println(alice)
 	}
 
-	bob, err := queries.CreateUser(ctx, dbc.CreateUserParams{
+	bob, err := writeQueries.CreateUser(ctx, dbc.CreateUserParams{
 		Uuid:    bobUuid.String(),
 		Name:    "Bob",
 		VenmoID: nil,
@@ -70,7 +93,7 @@ func main() {
 	}
 	groupDescription := "Alice and Bob are in love!"
 
-	group, err := queries.CreateGroup(ctx, dbc.CreateGroupParams{
+	group, err := writeQueries.CreateGroup(ctx, dbc.CreateGroupParams{
 		Uuid:        groupUuid.String(),
 		Name:        "Lovers",
 		Description: &groupDescription,
@@ -89,7 +112,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-    tpUuid1, err := uuid.NewV7()
+	tpUuid1, err := uuid.NewV7()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -106,12 +129,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	tx1, err := queries.CreateTransaction(ctx, dbc.CreateTransactionParams{
+	tx1, err := writeQueries.CreateTransaction(ctx, dbc.CreateTransactionParams{
 		Uuid:        txUuid1.String(),
 		Type:        "expense",
 		Description: "dinner",
-		Amount:      1000,
-		Date:        time.Now().UTC(),
+		Date:        time.Now().UTC().Unix(),
 		PaidBy:      alice.Uuid,
 		GroupUuid:   nil,
 	})
@@ -119,30 +141,29 @@ func main() {
 		log.Fatal(err)
 	}
 
+	if _, err = writeQueries.CreateTransactionParticipants(ctx, dbc.CreateTransactionParticipantsParams{
+		Uuid:     tpUuid1.String(),
+		TxnUuid:  tx1.Uuid,
+		UserUuid: alice.Uuid,
+		Share:    500,
+	}); err != nil {
+		log.Fatal(err)
+	}
+	if _, err = writeQueries.CreateTransactionParticipants(ctx, dbc.CreateTransactionParticipantsParams{
+		Uuid:     tpUuid2.String(),
+		TxnUuid:  tx1.Uuid,
+		UserUuid: bob.Uuid,
+		Share:    500,
+	}); err != nil {
+		log.Fatal(err)
+	}
 
-    if _, err = queries.CreateTransactionParticipants(ctx, dbc.CreateTransactionParticipantsParams{
-        Uuid: tpUuid1.String(),
-        TxnUuid: tx1.Uuid,
-        UserUuid: alice.Uuid,
-        Share: 500,
-    }); err != nil {
-        log.Fatal(err)
-    }
-    if _, err = queries.CreateTransactionParticipants(ctx, dbc.CreateTransactionParticipantsParams{
-        Uuid: tpUuid2.String(),
-        TxnUuid: tx1.Uuid,
-        UserUuid: bob.Uuid,
-        Share: 500,
-    }); err != nil {
-        log.Fatal(err)
-    }
-
-	tx2, err := queries.CreateTransaction(ctx, dbc.CreateTransactionParams{
+	tx2, err := writeQueries.CreateTransaction(ctx, dbc.CreateTransactionParams{
 		Uuid:        txUuid2.String(),
 		Type:        "expense",
 		Description: "new car",
 		Amount:      5000,
-		Date:        time.Now().UTC(),
+		Date:        time.Now().UTC().Unix(),
 		PaidBy:      bob.Uuid,
 		GroupUuid:   nil,
 	})
@@ -150,35 +171,34 @@ func main() {
 		log.Fatal(err)
 	}
 
-    if _, err = queries.CreateTransactionParticipants(ctx, dbc.CreateTransactionParticipantsParams{
-        Uuid: tpUuid3.String(),
-        TxnUuid: tx2.Uuid,
-        UserUuid: alice.Uuid,
-        Share: 2000,
-    }); err != nil {
-        log.Fatal(err)
-    }
-    if _, err = queries.CreateTransactionParticipants(ctx, dbc.CreateTransactionParticipantsParams{
-        Uuid: tpUuid4.String(),
-        TxnUuid: tx2.Uuid,
-        UserUuid: bob.Uuid,
-        Share: 2000,
-    }); err != nil {
-        log.Fatal(err)
-    }
+	if _, err = writeQueries.CreateTransactionParticipants(ctx, dbc.CreateTransactionParticipantsParams{
+		Uuid:     tpUuid3.String(),
+		TxnUuid:  tx2.Uuid,
+		UserUuid: alice.Uuid,
+		Share:    2000,
+	}); err != nil {
+		log.Fatal(err)
+	}
+	if _, err = writeQueries.CreateTransactionParticipants(ctx, dbc.CreateTransactionParticipantsParams{
+		Uuid:     tpUuid4.String(),
+		TxnUuid:  tx2.Uuid,
+		UserUuid: bob.Uuid,
+		Share:    2000,
+	}); err != nil {
+		log.Fatal(err)
+	}
 
-
-	debts, err := queries.GetDebts(ctx)
+	debts, err := readQueries.GetDebts(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	for _, debt := range debts {
-		debtor, err := queries.GetUser(ctx, debt.Debtor)
+		debtor, err := readQueries.GetUser(ctx, debt.Debtor)
 		if err != nil {
 			log.Fatal(err)
 		}
-		creditor, err := queries.GetUser(ctx, debt.Creditor)
+		creditor, err := readQueries.GetUser(ctx, debt.Creditor)
 		if err != nil {
 			log.Fatal(err)
 		}

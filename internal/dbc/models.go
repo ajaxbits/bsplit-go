@@ -4,15 +4,11 @@
 
 package dbc
 
-import (
-	"time"
-)
-
 type Group struct {
-	Uuid        string     `json:"uuid"`
-	CreatedAt   *time.Time `json:"created_at"`
-	Name        string     `json:"name"`
-	Description *string    `json:"description"`
+	Uuid        string  `json:"uuid"`
+	CreatedAt   *int64  `json:"created_at"`
+	Name        string  `json:"name"`
+	Description *string `json:"description"`
 }
 
 type GroupMember struct {
@@ -22,14 +18,14 @@ type GroupMember struct {
 }
 
 type Transaction struct {
-	Uuid        string     `json:"uuid"`
-	CreatedAt   *time.Time `json:"created_at"`
-	Type        string     `json:"type"`
-	Description string     `json:"description"`
-	Amount      int64      `json:"amount"`
-	Date        time.Time  `json:"date"`
-	PaidBy      string     `json:"paid_by"`
-	GroupUuid   *string    `json:"group_uuid"`
+	Uuid        string  `json:"uuid"`
+	CreatedAt   *int64  `json:"created_at"`
+	Type        string  `json:"type"`
+	Description string  `json:"description"`
+	Amount      int64   `json:"amount"`
+	Date        int64   `json:"date"`
+	PaidBy      string  `json:"paid_by"`
+	GroupUuid   *string `json:"group_uuid"`
 }
 
 type TransactionParticipant struct {
@@ -40,8 +36,8 @@ type TransactionParticipant struct {
 }
 
 type User struct {
-	Uuid      string     `json:"uuid"`
-	CreatedAt *time.Time `json:"created_at"`
-	Name      string     `json:"name"`
-	VenmoID   *string    `json:"venmo_id"`
+	Uuid      string  `json:"uuid"`
+	CreatedAt *int64  `json:"created_at"`
+	Name      string  `json:"name"`
+	VenmoID   *string `json:"venmo_id"`
 }

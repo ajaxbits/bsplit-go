@@ -1,12 +1,10 @@
 -- name: CreateUser :one
 insert into Users (
     uuid
-    , created_at
     , name
     , venmo_id
 ) values (
     @uuid
-    , current_timestamp
     , @name
     , @venmo_id
 ) returning *;
@@ -35,12 +33,10 @@ where
 -- name: CreateGroup :one
 insert into Groups (
     uuid
-    , created_at
     , name
     , description
 ) values (
     @uuid
-    , current_timestamp
     , @name
     , @description
 ) returning *;
@@ -69,7 +65,6 @@ where
 -- name: CreateTransaction :one
 insert into Transactions (
     uuid
-    , created_at
     , type
     , description
     , amount
@@ -78,7 +73,6 @@ insert into Transactions (
     , group_uuid
 ) values (
     @uuid
-    , current_timestamp
     , @type
     , @description
     , @amount

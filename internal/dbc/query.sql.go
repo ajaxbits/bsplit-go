@@ -7,18 +7,15 @@ package dbc
 
 import (
 	"context"
-	"time"
 )
 
 const createGroup = `-- name: CreateGroup :one
 insert into Groups (
     uuid
-    , created_at
     , name
     , description
 ) values (
     ?1
-    , current_timestamp
     , ?2
     , ?3
 ) returning uuid, created_at, name, description
@@ -45,7 +42,6 @@ func (q *Queries) CreateGroup(ctx context.Context, arg CreateGroupParams) (Group
 const createTransaction = `-- name: CreateTransaction :one
 insert into Transactions (
     uuid
-    , created_at
     , type
     , description
     , amount
@@ -54,7 +50,6 @@ insert into Transactions (
     , group_uuid
 ) values (
     ?1
-    , current_timestamp
     , ?2
     , ?3
     , ?4
@@ -65,13 +60,13 @@ insert into Transactions (
 `
 
 type CreateTransactionParams struct {
-	Uuid        string    `json:"uuid"`
-	Type        string    `json:"type"`
-	Description string    `json:"description"`
-	Amount      int64     `json:"amount"`
-	Date        time.Time `json:"date"`
-	PaidBy      string    `json:"paid_by"`
-	GroupUuid   *string   `json:"group_uuid"`
+	Uuid        string  `json:"uuid"`
+	Type        string  `json:"type"`
+	Description string  `json:"description"`
+	Amount      int64   `json:"amount"`
+	Date        int64   `json:"date"`
+	PaidBy      string  `json:"paid_by"`
+	GroupUuid   *string `json:"group_uuid"`
 }
 
 func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionParams) (Transaction, error) {
@@ -139,12 +134,10 @@ func (q *Queries) CreateTransactionParticipants(ctx context.Context, arg CreateT
 const createUser = `-- name: CreateUser :one
 insert into Users (
     uuid
-    , created_at
     , name
     , venmo_id
 ) values (
     ?1
-    , current_timestamp
     , ?2
     , ?3
 ) returning uuid, created_at, name, venmo_id
