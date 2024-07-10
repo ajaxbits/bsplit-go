@@ -83,7 +83,7 @@ insert into Transactions (
 
 
 
--- name: CreateTransactionParticipants :one
+-- name: CreateTransactionParticipant :one
 insert into TransactionParticipants (
     uuid
     , txn_uuid

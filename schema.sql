@@ -1,13 +1,11 @@
 create table if not exists Users (
     uuid text primary key not null unique
-    , created_at integer default (unixepoch('utc'))
     , name text not null
     , venmo_id text
 ) strict;
 
 create table if not exists Groups (
     uuid text primary key not null unique
-    , created_at integer default (unixepoch('utc'))
     , name text not null
     , description text
 ) strict;
@@ -22,7 +20,6 @@ create table if not exists GroupMembers (
 
 create table if not exists Transactions (
     uuid text primary key not null unique
-    , created_at integer default (unixepoch('utc'))
     , type text check(type in ('expense', 'settle')) not null
     , description text not null
     , amount integer not null

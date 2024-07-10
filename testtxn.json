@@ -1,0 +1,21 @@
+{
+  "description": "This is a really expensive hamburger",
+  "amount": 1000,
+  "date": 1720648483,
+  "paid_by": "01909eab-3e41-7ac9-a6c7-141b35e47d32",
+  "group_uuid": "01909eab-3e42-742a-a889-c29cacf7894f",
+  "participants": [
+    {
+      "user_uuid": "01909eab-3e41-7ac9-a6c7-141b35e47d32",
+      "share": 500
+    },
+    {
+      "user_uuid": "01909eab-3e41-7ad1-90e4-d58b1f2d887e",
+      "share": 250
+    },
+    {
+      "user_uuid": "01909eab-b197-79db-ae3b-998e906e27b4",
+      "share": 250
+    }
+  ]
+}

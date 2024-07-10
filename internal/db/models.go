@@ -6,7 +6,6 @@ package db
 
 type Group struct {
 	Uuid        string  `json:"uuid"`
-	CreatedAt   *int64  `json:"created_at"`
 	Name        string  `json:"name"`
 	Description *string `json:"description"`
 }
@@ -19,7 +18,6 @@ type GroupMember struct {
 
 type Transaction struct {
 	Uuid        string  `json:"uuid"`
-	CreatedAt   *int64  `json:"created_at"`
 	Type        string  `json:"type"`
 	Description string  `json:"description"`
 	Amount      int64   `json:"amount"`
@@ -36,8 +34,7 @@ type TransactionParticipant struct {
 }
 
 type User struct {
-	Uuid      string  `json:"uuid"`
-	CreatedAt *int64  `json:"created_at"`
-	Name      string  `json:"name"`
-	VenmoID   *string `json:"venmo_id"`
+	Uuid    string  `json:"uuid"`
+	Name    string  `json:"name"`
+	VenmoID *string `json:"venmo_id"`
 }
