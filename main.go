@@ -13,7 +13,7 @@ import (
 	// "net/http"
 	"time"
 
-	"ajaxbits.com/bsplit/internal/dbc"
+	"ajaxbits.com/bsplit/internal/db"
 	"github.com/google/uuid"
 	// "ajaxbits.com/bsplit/internal/handlers"
 )
@@ -49,8 +49,8 @@ func main() {
 	readDb.SetMaxOpenConns(max(4, runtime.NumCPU()))
 
 	ctx := context.Background()
-	writeQueries := dbc.New(writeDb)
-	readQueries := dbc.New(readDb)
+	writeQueries := db.New(writeDb)
+	readQueries := db.New(readDb)
 
 	if _, err := writeDb.ExecContext(ctx, ddl); err != nil {
 		log.Fatal(err)
@@ -65,7 +65,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	alice, err := writeQueries.CreateUser(ctx, dbc.CreateUserParams{
+	alice, err := writeQueries.CreateUser(ctx, db.CreateUserParams{
 		Uuid:    aliceUuid.String(),
 		Name:    "Alice",
 		VenmoID: nil,
@@ -76,7 +76,7 @@ func main() {
 		log.Println(alice)
 	}
 
-	bob, err := writeQueries.CreateUser(ctx, dbc.CreateUserParams{
+	bob, err := writeQueries.CreateUser(ctx, db.CreateUserParams{
 		Uuid:    bobUuid.String(),
 		Name:    "Bob",
 		VenmoID: nil,
@@ -93,7 +93,7 @@ func main() {
 	}
 	groupDescription := "Alice and Bob are in love!"
 
-	group, err := writeQueries.CreateGroup(ctx, dbc.CreateGroupParams{
+	group, err := writeQueries.CreateGroup(ctx, db.CreateGroupParams{
 		Uuid:        groupUuid.String(),
 		Name:        "Lovers",
 		Description: &groupDescription,
@@ -129,7 +129,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	tx1, err := writeQueries.CreateTransaction(ctx, dbc.CreateTransactionParams{
+	tx1, err := writeQueries.CreateTransaction(ctx, db.CreateTransactionParams{
 		Uuid:        txUuid1.String(),
 		Type:        "expense",
 		Description: "dinner",
@@ -141,7 +141,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if _, err = writeQueries.CreateTransactionParticipants(ctx, dbc.CreateTransactionParticipantsParams{
+	if _, err = writeQueries.CreateTransactionParticipants(ctx, db.CreateTransactionParticipantsParams{
 		Uuid:     tpUuid1.String(),
 		TxnUuid:  tx1.Uuid,
 		UserUuid: alice.Uuid,
@@ -149,7 +149,7 @@ func main() {
 	}); err != nil {
 		log.Fatal(err)
 	}
-	if _, err = writeQueries.CreateTransactionParticipants(ctx, dbc.CreateTransactionParticipantsParams{
+	if _, err = writeQueries.CreateTransactionParticipants(ctx, db.CreateTransactionParticipantsParams{
 		Uuid:     tpUuid2.String(),
 		TxnUuid:  tx1.Uuid,
 		UserUuid: bob.Uuid,
@@ -158,7 +158,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	tx2, err := writeQueries.CreateTransaction(ctx, dbc.CreateTransactionParams{
+	tx2, err := writeQueries.CreateTransaction(ctx, db.CreateTransactionParams{
 		Uuid:        txUuid2.String(),
 		Type:        "expense",
 		Description: "new car",
@@ -171,7 +171,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if _, err = writeQueries.CreateTransactionParticipants(ctx, dbc.CreateTransactionParticipantsParams{
+	if _, err = writeQueries.CreateTransactionParticipants(ctx, db.CreateTransactionParticipantsParams{
 		Uuid:     tpUuid3.String(),
 		TxnUuid:  tx2.Uuid,
 		UserUuid: alice.Uuid,
@@ -179,7 +179,7 @@ func main() {
 	}); err != nil {
 		log.Fatal(err)
 	}
-	if _, err = writeQueries.CreateTransactionParticipants(ctx, dbc.CreateTransactionParticipantsParams{
+	if _, err = writeQueries.CreateTransactionParticipants(ctx, db.CreateTransactionParticipantsParams{
 		Uuid:     tpUuid4.String(),
 		TxnUuid:  tx2.Uuid,
 		UserUuid: bob.Uuid,
