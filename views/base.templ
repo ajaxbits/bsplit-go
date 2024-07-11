@@ -1,7 +1,51 @@
 package views
 
+import (
+	"ajaxbits.com/bsplit/db"
+	"strconv"
+)
+
+templ UsersResult(users []db.User) {
+	for _, user := range users {
+		<tr>
+			<td>{ user.Uuid }</td>
+			<td>{ user.Name }</td>
+			<td>{ *user.VenmoID }</td>
+		</tr>
+	}
+}
+
+templ usersTable() {
+	<h3>
+		Search Contacts
+		<span class="htmx-indicator">
+			Searching...
+		</span>
+	</h3>
+	<input
+		class="form-control"
+		type="search"
+		name="search"
+		placeholder="Begin Typing To Search Users..."
+		hx-post="/users"
+		hx-trigger="input changed delay:500ms, search"
+		hx-target="#search-results"
+		hx-indicator=".htmx-indicator"
+	/>
+	<table class="table">
+		<thead>
+			<tr>
+				<th>UUID</th>
+				<th>Name</th>
+				<th>VenmoID</th>
+			</tr>
+		</thead>
+		<tbody id="search-results"></tbody>
+	</table>
+}
+
 templ form() {
-	<form hx-post="/split" hx-target="#result" hx-swap="innerHTML">
+	<form hx-post="/split" hx-target="#result">
 		<label for="total">Total Expense:</label>
 		<input type="text" id="total" name="total"/>
 		<label for="participants">Number of Participants:</label>
@@ -9,6 +53,15 @@ templ form() {
 		<button type="submit">Split</button>
 	</form>
 	<div id="result"></div>
+}
+
+templ Result(participants int, splits []int) {
+	<p>For { strconv.Itoa(participants) } participants, each person should pay:</p>
+	<ul>
+		for _, amount := range splits {
+			<li>${ strconv.FormatFloat(float64(amount)/100, 'f', -1, 64) }</li>
+		}
+	</ul>
 }
 
 templ Base() {
@@ -26,8 +79,7 @@ templ Base() {
 		</head>
 		<body>
 			<main class="container">
-				<h1>Test</h1>
-				<p>This is a test</p>
+				@usersTable()
 				@form()
 			</main>
 		</body>

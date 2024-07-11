@@ -45,7 +45,7 @@ func SplitHandler(c echo.Context) error {
 	split := Split(total, participants, Even)
 
 	c.Logger().Infof("split: %+v", split)
-	return c.Redirect(200, "/")
+	return Render(c, http.StatusOK, views.Result(participants, split))
 }
 
 func GetUsersHandler(c echo.Context) error {
@@ -56,6 +56,15 @@ func GetUsersHandler(c echo.Context) error {
 	}
 
 	return c.JSON(200, users)
+}
+func SearchUsersHandler(c echo.Context) error {
+	users, err := readQueries.GetAllUsers(c.Request().Context())
+	if err != nil {
+		c.Logger().Error("Could not list users from db")
+		return c.String(http.StatusInternalServerError, "unable to list users")
+	}
+
+	return Render(c, http.StatusOK, views.UsersResult(users))
 }
 
 func CreateUserHandler(c echo.Context) error {
