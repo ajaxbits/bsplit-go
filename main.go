@@ -33,12 +33,11 @@ func main() {
 		Level: 5,
 	}))
 
-	
 	e.GET("/users", GetUsersHandler)
-	e.POST("/user", CreateUserHandler)
+	e.PUT("/user", CreateUserHandler)
 	e.GET("/groups", GetGroupsHandler)
-	e.POST("/group", CreateGroupHandler)
-	e.POST("/txn", TransactionHandler)
+	e.PUT("/group", CreateGroupHandler)
+	e.PUT("/txn", TransactionHandler)
 
 	e.Logger.Fatal(e.Start("localhost:8080"))
 }
