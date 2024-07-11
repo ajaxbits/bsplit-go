@@ -1,0 +1,22 @@
+package views
+
+templ Base() {
+	<html lang="en">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>Wow</title>
+			<script src="https://unpkg.com/htmx.org@2.0.0" integrity="sha384-wS5l5IKJBvK6sPTKa2WZ1js3d947pvWXbPJ1OmWfEuxLgeHcEbjUUA5i9V5ZkpCw" crossorigin="anonymous"></script>
+		</head>
+		<body>
+			<h1>Test</h1>
+			<p>This is a test</p>
+			<form hx-post="/split" hx-target="#result" hx-swap="innerHTML">
+				<label for="total">Total Expense:</label>
+				<input type="text" id="total" name="total"/>
+				<button type="submit">Split</button>
+			</form>
+			<div id="result"></div>
+		</body>
+	</html>
+}

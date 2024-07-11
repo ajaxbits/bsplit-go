@@ -18,4 +18,8 @@ buildGoApplication {
   pwd = ../.;
   src = ../.;
   modules = ./gomod2nix.toml;
+  
+  preBuild = ''
+    ${pkgs.templ}/bin/templ generate
+  '';
 }

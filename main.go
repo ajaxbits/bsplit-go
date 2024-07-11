@@ -26,6 +26,7 @@ func main() {
 	}
 
 	e := echo.New()
+	e.HideBanner = true
 	e.Logger.SetLevel(log.INFO)
 	e.Pre(middleware.RemoveTrailingSlash())
 	e.Use(middleware.Logger()) // TODO: use the newer logger eventually
@@ -33,11 +34,13 @@ func main() {
 		Level: 5,
 	}))
 
+	e.GET("/", RootHandler)
 	e.GET("/users", GetUsersHandler)
 	e.PUT("/user", CreateUserHandler)
 	e.GET("/groups", GetGroupsHandler)
 	e.PUT("/group", CreateGroupHandler)
 	e.PUT("/txn", TransactionHandler)
+	e.POST("/split", SplitHandler)
 
 	e.Logger.Fatal(e.Start("localhost:8080"))
 }

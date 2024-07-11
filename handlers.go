@@ -10,7 +10,7 @@ import (
 	_ "embed"
 
 	"ajaxbits.com/bsplit/db"
-	"ajaxbits.com/bsplit/internal/splits"
+	"ajaxbits.com/bsplit/views"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
@@ -20,29 +20,23 @@ var templates = template.Must(template.ParseGlob("templates/*.html"))
 var writeQueries = db.New(writeDb)
 var readQueries = db.New(readDb)
 
-func RootHandler(w http.ResponseWriter, r *http.Request) {
-	templates.ExecuteTemplate(w, "home.html", nil)
+func RootHandler(c echo.Context) error {
+	base := views.Base()
+	return base.Render(c.Request().Context(), c.Response().Writer)
 }
 
-func SplitHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodPost {
-		r.ParseForm()
-		totalStr := r.FormValue("total")
-		total, err := strconv.ParseFloat(totalStr, 64)
-		if err != nil {
-			http.Error(w, "Invalid total amount", http.StatusBadRequest)
-			return
-		}
-
-		split := splits.Split(total, 3, splits.Even)
-
-		log.Println("Split:", split)
-
-		templates.ExecuteTemplate(w, "result.html", total)
-	} else {
-		log.Println("Split endpoint called without post command")
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+func SplitHandler(c echo.Context) error {
+	totalStr := c.FormValue("total")
+	total, err := strconv.ParseFloat(totalStr, 64)
+	if err != nil {
+		c.Logger().Errorf("invalid total amount: %+v", err)
+		return c.String(http.StatusInternalServerError, "unable to create user")
 	}
+
+	split := Split(total, 3, Even)
+
+	c.Logger().Infof("split: %+v", split)
+	return c.Redirect(200, "/")
 }
 
 func GetUsersHandler(c echo.Context) error {
@@ -131,7 +125,7 @@ func CreateGroupHandler(c echo.Context) error {
 
 func TransactionHandler(c echo.Context) error {
 	decoder := json.NewDecoder(c.Request().Body)
-	var t struct{
+	var t struct {
 		Description  string  `json:"description"`
 		Amount       int64   `json:"amount"`
 		Date         int64   `json:"date"`

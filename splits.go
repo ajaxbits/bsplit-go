@@ -1,8 +1,24 @@
-package splits
+package main
 
 import (
 	"math"
 )
+
+type SplitType int
+
+const (
+	Even = iota
+	Percent
+	Adjustment
+	Exact
+)
+
+var splitTypeName = map[SplitType]string{
+	Even:       "even",
+	Percent:    "percent",
+	Adjustment: "adjustment",
+	Exact:      "exact",
+}
 
 func Split(amount float64, participants int, splitType SplitType) []int {
 	switch splitType {

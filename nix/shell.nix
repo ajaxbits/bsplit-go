@@ -29,5 +29,7 @@ in
         sqlite-interactive
         just
         sqlc
+        templ
+        parallel
       ]);
   }

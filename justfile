@@ -15,3 +15,4 @@ clean:
 
 gen:
     sqlc generate
+    templ generate
