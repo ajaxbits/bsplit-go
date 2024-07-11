@@ -12,6 +12,7 @@
   ),
   mkGoEnv ? pkgs.mkGoEnv,
   gomod2nix ? pkgs.gomod2nix,
+  templ,
 }: let
   goEnv = mkGoEnv {pwd = ../.;};
 in
@@ -28,5 +29,6 @@ in
         sqlite-interactive
         just
         sqlc
+        templ
       ]);
   }
