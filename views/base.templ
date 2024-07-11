@@ -5,6 +5,19 @@ import (
 	"strconv"
 )
 
+templ CreateUserForm() {
+	<div style="display: flex">
+		<form hx-post="/user" hx-target="#result">
+			<label for="name">Name:</label>
+			<input type="text" id="name" name="name" required/>
+			<label for="venmo_id">Venmo ID:</label>
+			<input type="text" id="venmo_id" name="venmo_id"/>
+			<button type="submit">Create</button>
+		</form>
+		<div id="createUserResult"></div>
+	</div>
+}
+
 templ UsersResult(users []db.User) {
 	for _, user := range users {
 		<tr>
@@ -79,6 +92,7 @@ templ Base() {
 		</head>
 		<body>
 			<main class="container">
+				@CreateUserForm()
 				@usersTable()
 				@form()
 			</main>

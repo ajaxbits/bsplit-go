@@ -20,7 +20,6 @@ var templates = template.Must(template.ParseGlob("templates/*.html"))
 var writeQueries = db.New(writeDb)
 var readQueries = db.New(readDb)
 
-
 func RootHandler(c echo.Context) error {
 	return Render(c, http.StatusOK, views.Base())
 }
@@ -32,7 +31,7 @@ func SplitHandler(c echo.Context) error {
 		c.Logger().Errorf("invalid total amount: %+v", err)
 		return c.String(http.StatusInternalServerError, "unable to create split")
 	}
-	
+
 	participants, err := strconv.Atoi(participantsStr)
 	if err != nil {
 		c.Logger().Errorf("error parsing participants: %+v", err)
@@ -68,7 +67,7 @@ func SearchUsersHandler(c echo.Context) error {
 }
 
 func CreateUserHandler(c echo.Context) error {
-	userName, venmoId := c.QueryParam("name"), c.QueryParam("venmo")
+	userName, venmoId := c.FormValue("name"), c.FormValue("venmo_id")
 	if userName == "" {
 		c.Logger().Error("User name field empty")
 		return c.String(http.StatusInternalServerError, "unable to create user")
@@ -80,7 +79,7 @@ func CreateUserHandler(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "unable to create user")
 	}
 
-	user, err := writeQueries.CreateUser(ctx, db.CreateUserParams{
+	_, err = writeQueries.CreateUser(ctx, db.CreateUserParams{
 		Uuid:    userUuid.String(),
 		Name:    userName,
 		VenmoID: &venmoId,
@@ -90,8 +89,7 @@ func CreateUserHandler(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "unable to create user")
 	}
 
-	c.Logger().Infof("user: %+v", user)
-	return c.NoContent(200)
+	return c.HTML(200, "Created!")
 }
 
 func GetGroupsHandler(c echo.Context) error {

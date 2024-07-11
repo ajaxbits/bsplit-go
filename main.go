@@ -47,9 +47,9 @@ func main() {
 	}))
 
 	e.GET("/", RootHandler)
+	e.POST("/user", CreateUserHandler)
 	e.GET("/users", GetUsersHandler)
 	e.POST("/users", SearchUsersHandler)
-	e.PUT("/user", CreateUserHandler)
 	e.GET("/groups", GetGroupsHandler)
 	e.PUT("/group", CreateGroupHandler)
 	e.PUT("/txn", TransactionHandler)
