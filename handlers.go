@@ -129,21 +129,19 @@ func CreateGroupHandler(c echo.Context) error {
 	return c.NoContent(200)
 }
 
-type NewTransaction struct {
-	Description  string  `json:"description"`
-	Amount       int64   `json:"amount"`
-	Date         int64   `json:"date"`
-	PaidBy       string  `json:"paid_by"`
-	GroupUuid    *string `json:"group_uuid"`
-	Participants []struct {
-		UserUuid string `json:"user_uuid"`
-		Share    int64  `json:"share"`
-	} `json:"participants"`
-}
-
 func TransactionHandler(c echo.Context) error {
 	decoder := json.NewDecoder(c.Request().Body)
-	var t NewTransaction
+	var t struct{
+		Description  string  `json:"description"`
+		Amount       int64   `json:"amount"`
+		Date         int64   `json:"date"`
+		PaidBy       string  `json:"paid_by"`
+		GroupUuid    *string `json:"group_uuid"`
+		Participants []struct {
+			UserUuid string `json:"user_uuid"`
+			Share    int64  `json:"share"`
+		} `json:"participants"`
+	}
 	err := decoder.Decode(&t)
 	if err != nil {
 		c.Logger().Errorf("could not create json decoder: %+v", err)
