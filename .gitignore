@@ -4,3 +4,4 @@
 result
 expenses.db*
 .DS_Store
+tmp/

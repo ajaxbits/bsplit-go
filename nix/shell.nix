@@ -23,6 +23,7 @@ in
         gomod2nix
       ]
       ++ (with pkgs; [
+        air
         gopls
         gotools
         go-tools
