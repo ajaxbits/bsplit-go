@@ -20,20 +20,29 @@ var templates = template.Must(template.ParseGlob("templates/*.html"))
 var writeQueries = db.New(writeDb)
 var readQueries = db.New(readDb)
 
+
 func RootHandler(c echo.Context) error {
-	base := views.Base()
-	return base.Render(c.Request().Context(), c.Response().Writer)
+	return Render(c, http.StatusOK, views.Base())
 }
 
 func SplitHandler(c echo.Context) error {
-	totalStr := c.FormValue("total")
+	totalStr, participantsStr := c.FormValue("total"), c.FormValue("participants")
 	total, err := strconv.ParseFloat(totalStr, 64)
 	if err != nil {
 		c.Logger().Errorf("invalid total amount: %+v", err)
-		return c.String(http.StatusInternalServerError, "unable to create user")
+		return c.String(http.StatusInternalServerError, "unable to create split")
+	}
+	
+	participants, err := strconv.Atoi(participantsStr)
+	if err != nil {
+		c.Logger().Errorf("error parsing participants: %+v", err)
+		return c.String(http.StatusInternalServerError, "unable to create split")
+	} else if participants < 2 {
+		c.Logger().Errorf("not enough participants: %+v", err)
+		return c.String(http.StatusInternalServerError, "unable to create split, not enough participants")
 	}
 
-	split := Split(total, 3, Even)
+	split := Split(total, participants, Even)
 
 	c.Logger().Infof("split: %+v", split)
 	return c.Redirect(200, "/")

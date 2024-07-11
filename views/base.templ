@@ -1,22 +1,35 @@
 package views
 
+templ form() {
+	<form hx-post="/split" hx-target="#result" hx-swap="innerHTML">
+		<label for="total">Total Expense:</label>
+		<input type="text" id="total" name="total"/>
+		<label for="participants">Number of Participants:</label>
+		<input type="number" id="participants" name="participants"/>
+		<button type="submit">Split</button>
+	</form>
+	<div id="result"></div>
+}
+
 templ Base() {
 	<html lang="en">
 		<head>
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<meta name="color-scheme" content="light dark"/>
 			<title>Wow</title>
 			<script src="https://unpkg.com/htmx.org@2.0.0" integrity="sha384-wS5l5IKJBvK6sPTKa2WZ1js3d947pvWXbPJ1OmWfEuxLgeHcEbjUUA5i9V5ZkpCw" crossorigin="anonymous"></script>
+			<link
+				rel="stylesheet"
+				href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
+			/>
 		</head>
 		<body>
-			<h1>Test</h1>
-			<p>This is a test</p>
-			<form hx-post="/split" hx-target="#result" hx-swap="innerHTML">
-				<label for="total">Total Expense:</label>
-				<input type="text" id="total" name="total"/>
-				<button type="submit">Split</button>
-			</form>
-			<div id="result"></div>
+			<main class="container">
+				<h1>Test</h1>
+				<p>This is a test</p>
+				@form()
+			</main>
 		</body>
 	</html>
 }
