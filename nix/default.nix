@@ -11,7 +11,6 @@
       }
   ),
   buildGoApplication ? pkgs.buildGoApplication,
-  templ,
 }:
 buildGoApplication {
   pname = "bsplit";
@@ -19,7 +18,4 @@ buildGoApplication {
   pwd = ../.;
   src = ../.;
   modules = ./gomod2nix.toml;
-  preBuild = ''
-    ${templ}/bin/templ generate
-  '';
 }
