@@ -27,7 +27,11 @@ func main() {
 
 	e := echo.New()
 	e.Logger.SetLevel(log.INFO)
-	e.Use(middleware.Logger())
+	e.Pre(middleware.RemoveTrailingSlash())
+	e.Use(middleware.Logger()) // TODO: use the newer logger eventually
+	e.Use(middleware.GzipWithConfig(middleware.GzipConfig{
+		Level: 5,
+	}))
 
 	e.GET("/user", UserHandler)
 	e.POST("/group", GroupHandler)
