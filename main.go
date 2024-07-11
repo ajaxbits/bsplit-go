@@ -4,12 +4,16 @@ import (
 	"context"
 	_ "embed"
 	"log"
-	"net/http"
+	log2 "github.com/labstack/gommon/log"
+	// "net/http"
 	// "time"
 
 	"ajaxbits.com/bsplit/internal/db"
 	"github.com/google/uuid"
 	_ "github.com/mattn/go-sqlite3"
+	
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 //go:embed schema.sql
@@ -175,12 +179,18 @@ func main() {
 
 	// 	log.Default().Printf("%s owes %s: %v", debtor.Name, creditor.Name, debt.NetAmount)
 	// }
+	
+	e := echo.New()
+	e.Logger.SetLevel(log2.INFO)
+	e.Use(middleware.Logger())
+	e.GET("/user", UserHandler)
+	e.Logger.Fatal(e.Start(":8080"))
 
 	// http.HandleFunc("/", handlers.RootHandler)
 	// http.HandleFunc("/split", handlers.SplitHandler)
-	http.HandleFunc("/user", UserHandler)
-	http.HandleFunc("/group", GroupHandler)
-	http.HandleFunc("/txn", TransactionHandler)
-	log.Println("Starting bsplit server on :8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	// http.HandleFunc("/user", UserHandler)
+	// http.HandleFunc("/group", GroupHandler)
+	// http.HandleFunc("/txn", TransactionHandler)
+	// log.Println("Starting bsplit server on :8080")
+	// log.Fatal(http.ListenAndServe(":8080", nil))
 }

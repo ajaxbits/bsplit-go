@@ -12,6 +12,7 @@ import (
 	"ajaxbits.com/bsplit/internal/db"
 	"ajaxbits.com/bsplit/internal/splits"
 	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
 )
 
 var templates = template.Must(template.ParseGlob("templates/*.html"))
@@ -44,8 +45,8 @@ func SplitHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func UserHandler(w http.ResponseWriter, r *http.Request) {
-	userName, venmoId := r.URL.Query().Get("name"), r.URL.Query().Get("venmo")
+func UserHandler(c echo.Context) error {
+	userName, venmoId := c.QueryParam("name"), c.QueryParam("venmo")
 	if userName != "" {
 		userUuid, err := uuid.NewV7()
 		if err != nil {
@@ -58,14 +59,17 @@ func UserHandler(w http.ResponseWriter, r *http.Request) {
 			VenmoID: &venmoId,
 		})
 		if err != nil {
-			log.Fatal(err)
+			c.Logger().Errorf("could not create user: %+v", err)
+			return c.String(http.StatusInternalServerError, "unable to create user")
 		} else {
-			log.Println(user)
+			c.Logger().Infof("user: %+v", user)
 		}
 	} else {
-		log.Println("User endpoint has no name in path")
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+		c.Logger().Error("User name field empty")
+		return c.String(http.StatusInternalServerError, "unable to create user")
 	}
+
+	return c.NoContent(200)
 }
 
 func GroupHandler(w http.ResponseWriter, r *http.Request) {
