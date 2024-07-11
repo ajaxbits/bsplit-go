@@ -47,55 +47,52 @@ func SplitHandler(w http.ResponseWriter, r *http.Request) {
 
 func UserHandler(c echo.Context) error {
 	userName, venmoId := c.QueryParam("name"), c.QueryParam("venmo")
-	if userName != "" {
-		userUuid, err := uuid.NewV7()
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		user, err := writeQueries.CreateUser(ctx, db.CreateUserParams{
-			Uuid:    userUuid.String(),
-			Name:    userName,
-			VenmoID: &venmoId,
-		})
-		if err != nil {
-			c.Logger().Errorf("could not create user: %+v", err)
-			return c.String(http.StatusInternalServerError, "unable to create user")
-		} else {
-			c.Logger().Infof("user: %+v", user)
-		}
-	} else {
+	if userName == "" {
 		c.Logger().Error("User name field empty")
 		return c.String(http.StatusInternalServerError, "unable to create user")
 	}
 
+	userUuid, err := uuid.NewV7()
+	if err != nil {
+		c.Logger().Errorf("could not create uuid: %+v", err)
+		return c.String(http.StatusInternalServerError, "unable to create user")
+	}
+
+	user, err := writeQueries.CreateUser(ctx, db.CreateUserParams{
+		Uuid:    userUuid.String(),
+		Name:    userName,
+		VenmoID: &venmoId,
+	})
+	if err != nil {
+		c.Logger().Errorf("could not create user in db: %+v", err)
+		return c.String(http.StatusInternalServerError, "unable to create user")
+	} 
+	
+	c.Logger().Infof("user: %+v", user)
 	return c.NoContent(200)
 }
 
-func GroupHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		log.Println("Group endpoint called with wrong method")
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-	}
-
-	decoder := json.NewDecoder(r.Body)
+func GroupHandler(c echo.Context) error {
+	decoder := json.NewDecoder(c.Request().Body)
 	var g struct {
 		Name        string `json:"name"`
 		Description string `json:"description"`
 	}
 	err := decoder.Decode(&g)
 	if err != nil {
-		log.Fatal(err)
+		c.Logger().Errorf("could not create json decoder: %+v", err)
+		return c.String(http.StatusInternalServerError, "unable to create group")
 	}
 
 	if g.Name == "" {
 		log.Println("User endpoint has no name in path")
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return c.String(http.StatusInternalServerError, "unable to create group")
 	}
 
 	groupUuid, err := uuid.NewV7()
 	if err != nil {
-		log.Fatal(err)
+		c.Logger().Errorf("could not create uuid: %+v", err)
+		return c.String(http.StatusInternalServerError, "unable to create group")
 	}
 
 	group, err := writeQueries.CreateGroup(ctx, db.CreateGroupParams{
@@ -104,10 +101,12 @@ func GroupHandler(w http.ResponseWriter, r *http.Request) {
 		Description: &g.Description,
 	})
 	if err != nil {
-		log.Fatal(err)
-	} else {
-		log.Println(group)
-	}
+		c.Logger().Errorf("could not create group in db: %+v", err)
+		return c.String(http.StatusInternalServerError, "unable to create group")
+	} 
+	
+	c.Logger().Infof("group: %+v", group)
+	return c.NoContent(200)
 }
 
 type NewTransaction struct {
@@ -122,27 +121,26 @@ type NewTransaction struct {
 	} `json:"participants"`
 }
 
-func TransactionHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		log.Println("Group endpoint called with wrong method")
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-	}
-
-	decoder := json.NewDecoder(r.Body)
+func TransactionHandler(c echo.Context) error {
+	decoder := json.NewDecoder(c.Request().Body)
 	var t NewTransaction
 	err := decoder.Decode(&t)
 	if err != nil {
-		log.Fatal(err)
+		c.Logger().Errorf("could not create json decoder: %+v", err)
+		return c.String(http.StatusInternalServerError, "unable to create transaction")
 	}
 
-	if t.Description == "" || t.Amount == 0 || len(t.Participants) > 0 {
-		log.Println("Something went wrong")
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+	if t.Description == "" || t.Amount == 0 || len(t.Participants) <= 0 {
+		c.Logger().Errorf("transaction has invalid format: %+v", err)
+		return c.String(http.StatusInternalServerError, "unable to create transaction")
 	}
+	
 	txnUuid, err := uuid.NewV7()
 	if err != nil {
-		log.Fatal(err)
+		c.Logger().Errorf("could not create uuid: %+v", err)
+		return c.String(http.StatusInternalServerError, "unable to create transaction")
 	}
+	
 	txn, err := writeQueries.CreateTransaction(ctx, db.CreateTransactionParams{
 		Uuid:        txnUuid.String(),
 		Description: t.Description,
@@ -152,28 +150,29 @@ func TransactionHandler(w http.ResponseWriter, r *http.Request) {
 		PaidBy:      t.PaidBy,
 		GroupUuid:   t.GroupUuid,
 	})
-
+	if err != nil {
+		c.Logger().Errorf("could not create transaction in db: %+v", err)
+		return c.String(http.StatusInternalServerError, "unable to create transaction")
+	} 
+	
 	for _, p := range t.Participants {
 		txnParticipantUuid, err := uuid.NewV7()
 		if err != nil {
-			log.Fatal(err)
+			c.Logger().Errorf("could not create uuid: %+v", err)
+			return c.String(http.StatusInternalServerError, "unable to create transaction")
 		}
-		txnParticipant, err := writeQueries.CreateTransactionParticipant(ctx, db.CreateTransactionParticipantParams{
+		_, err = writeQueries.CreateTransactionParticipant(ctx, db.CreateTransactionParticipantParams{
 			Uuid:     txnParticipantUuid.String(),
 			TxnUuid:  txnUuid.String(),
 			UserUuid: p.UserUuid,
 			Share:    p.Share,
 		})
 		if err != nil {
-			log.Fatal(err)
-		} else {
-			log.Println(txnParticipant)
+			c.Logger().Errorf("could not create transaction participant entry in db: %+v", err)
+			return c.String(http.StatusInternalServerError, "unable to create transaction")
 		}
 	}
-
-	if err != nil {
-		log.Fatal(err)
-	} else {
-		log.Println(txn)
-	}
+	
+	c.Logger().Infof("transaction: %+v", txn)
+	return c.NoContent(200)
 }
