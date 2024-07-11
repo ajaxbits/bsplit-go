@@ -4,7 +4,7 @@ import (
 	"context"
 	_ "embed"
 
-	"ajaxbits.com/bsplit/internal/db"
+	"ajaxbits.com/bsplit/db"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"

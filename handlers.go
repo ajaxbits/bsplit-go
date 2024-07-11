@@ -9,7 +9,7 @@ import (
 
 	_ "embed"
 
-	"ajaxbits.com/bsplit/internal/db"
+	"ajaxbits.com/bsplit/db"
 	"ajaxbits.com/bsplit/internal/splits"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
