@@ -31,5 +31,7 @@ in
         sqlc
         templ
         parallel
+
+        jujutsu
       ]);
   }
