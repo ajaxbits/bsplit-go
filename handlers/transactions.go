@@ -10,6 +10,15 @@ import (
 )
 
 func TransactionHandler(c echo.Context) error {
+	x, err := db.WriteBegin(db.Ctx)
+	if err != nil {
+		c.Logger().Errorf("could not start sql txn: %+v", err)
+		return c.String(http.StatusInternalServerError, "unable to create transaction")
+	}
+
+	tx, qtx := x.Tx, x.Qtx
+	defer tx.Rollback()
+
 	decoder := json.NewDecoder(c.Request().Body)
 	var t struct {
 		Description  string  `json:"description"`
@@ -22,7 +31,7 @@ func TransactionHandler(c echo.Context) error {
 			Share    int64  `json:"share"`
 		} `json:"participants"`
 	}
-	err := decoder.Decode(&t)
+	err = decoder.Decode(&t)
 	if err != nil {
 		c.Logger().Errorf("could not create json decoder: %+v", err)
 		return c.String(http.StatusInternalServerError, "unable to create transaction")
@@ -39,7 +48,7 @@ func TransactionHandler(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "unable to create transaction")
 	}
 
-	txn, err := db.WriteQueries.CreateTransaction(db.Ctx, db.CreateTransactionParams{
+	txn, err := qtx.CreateTransaction(db.Ctx, db.CreateTransactionParams{
 		Uuid:        txnUuid.String(),
 		Description: t.Description,
 		Type:        "expense",
@@ -59,7 +68,7 @@ func TransactionHandler(c echo.Context) error {
 			c.Logger().Errorf("could not create uuid: %+v", err)
 			return c.String(http.StatusInternalServerError, "unable to create transaction")
 		}
-		_, err = db.WriteQueries.CreateTransactionParticipant(db.Ctx, db.CreateTransactionParticipantParams{
+		_, err = qtx.CreateTransactionParticipant(db.Ctx, db.CreateTransactionParticipantParams{
 			Uuid:     txnParticipantUuid.String(),
 			TxnUuid:  txnUuid.String(),
 			UserUuid: p.UserUuid,
@@ -69,6 +78,12 @@ func TransactionHandler(c echo.Context) error {
 			c.Logger().Errorf("could not create transaction participant entry in db: %+v", err)
 			return c.String(http.StatusInternalServerError, "unable to create transaction")
 		}
+	}
+	
+	err = tx.Commit()
+	if err != nil {
+		c.Logger().Errorf("could not commit db transaction: %+v", err)
+		return c.String(http.StatusInternalServerError, "unable to create transaction")
 	}
 
 	c.Logger().Infof("transaction: %+v", txn)
