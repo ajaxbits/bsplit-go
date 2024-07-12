@@ -1,41 +1,20 @@
 package main
 
 import (
-	"context"
 	_ "embed"
 
 	"ajaxbits.com/bsplit/db"
+	"ajaxbits.com/bsplit/handlers"
 
-	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
 )
 
-//go:embed schema.sql
-var ddl string
-
-var ctx = context.Background()
-var readDb, writeDb = db.Init()
-
-func Render(ctx echo.Context, statusCode int, t templ.Component) error {
-	buf := templ.GetBuffer()
-	defer templ.ReleaseBuffer(buf)
-
-	if err := t.Render(ctx.Request().Context(), buf); err != nil {
-		return err
-	}
-
-	return ctx.HTML(statusCode, buf.String())
-}
 
 func main() {
-	defer readDb.Close()
-	defer writeDb.Close()
-
-	if _, err := writeDb.ExecContext(ctx, ddl); err != nil {
-		log.Fatal(err)
-	}
+	db.Init()
+	defer db.Close()
 
 	e := echo.New()
 	e.HideBanner = true
@@ -46,14 +25,14 @@ func main() {
 		Level: 5,
 	}))
 
-	e.GET("/", RootHandler)
-	e.POST("/user", CreateUserHandler)
-	e.GET("/users", GetUsersHandler)
-	e.POST("/users", SearchUsersHandler)
-	e.GET("/groups", GetGroupsHandler)
-	e.PUT("/group", CreateGroupHandler)
-	e.PUT("/txn", TransactionHandler)
-	e.POST("/split", SplitHandler)
+	e.GET("/", handlers.RootHandler)
+	e.POST("/user", handlers.CreateUserHandler)
+	e.GET("/users", handlers.GetUsersHandler)
+	e.POST("/users", handlers.SearchUsersHandler)
+	e.GET("/groups", handlers.GetGroupsHandler)
+	e.PUT("/group", handlers.CreateGroupHandler)
+	e.PUT("/txn", handlers.TransactionHandler)
+	e.POST("/split", handlers.SplitHandler)
 
 	e.Logger.Fatal(e.Start("localhost:8080"))
 }

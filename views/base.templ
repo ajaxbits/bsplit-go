@@ -7,7 +7,7 @@ import (
 
 templ CreateUserForm() {
 	<div style="display: flex">
-		<form hx-post="/user" hx-target="#result">
+		<form hx-post="/user" hx-target="#createUserResult">
 			<label for="name">Name:</label>
 			<input type="text" id="name" name="name" required/>
 			<label for="venmo_id">Venmo ID:</label>
@@ -72,7 +72,7 @@ templ Result(participants int, splits []int) {
 	<p>For { strconv.Itoa(participants) } participants, each person should pay:</p>
 	<ul>
 		for _, amount := range splits {
-			<li>${ strconv.FormatFloat(float64(amount)/100, 'f', -1, 64) }</li>
+			<li>${ strconv.FormatFloat(float64(amount)/100, 'f', 2, 64) }</li>
 		}
 	</ul>
 }
@@ -87,7 +87,7 @@ templ Base() {
 			<script src="https://unpkg.com/htmx.org@2.0.0" integrity="sha384-wS5l5IKJBvK6sPTKa2WZ1js3d947pvWXbPJ1OmWfEuxLgeHcEbjUUA5i9V5ZkpCw" crossorigin="anonymous"></script>
 			<link
 				rel="stylesheet"
-				href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
+				href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.classless.violet.min.css"
 			/>
 		</head>
 		<body>

@@ -1,14 +1,29 @@
 package db
 
 import (
+	"context"
 	"database/sql"
-	_ "github.com/mattn/go-sqlite3"
+	_ "embed"
 	"log"
 	"net/url"
 	"runtime"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
-func Init() (*sql.DB, *sql.DB) {
+//go:embed sql/schema.sql
+var ddl string
+
+var Ctx = context.Background()
+
+var (
+	readDb       *sql.DB
+	writeDb      *sql.DB
+	ReadQueries  *Queries
+	WriteQueries *Queries
+)
+
+func Init() {
 	// https://kerkour.com/sqlite-for-servers
 	dbConnectionUrlParams := make(url.Values)
 	dbConnectionUrlParams.Add("_txlock", "immediate")
@@ -32,5 +47,15 @@ func Init() (*sql.DB, *sql.DB) {
 	}
 	readDb.SetMaxOpenConns(max(4, runtime.NumCPU()))
 
-	return writeDb, readDb
+	if _, err := writeDb.ExecContext(Ctx, ddl); err != nil {
+		log.Fatal(err)
+	}
+
+	ReadQueries = New(readDb)
+	WriteQueries = New(writeDb)
+}
+
+func Close() {
+	readDb.Close()
+	writeDb.Close()
 }
