@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	"encoding/json"
-	"log"
 	"net/http"
 
 	"ajaxbits.com/bsplit/db"
@@ -21,19 +19,10 @@ func GetGroupsHandler(c echo.Context) error {
 }
 
 func CreateGroupHandler(c echo.Context) error {
-	decoder := json.NewDecoder(c.Request().Body)
-	var g struct {
-		Name        string `json:"name"`
-		Description string `json:"description"`
-	}
-	err := decoder.Decode(&g)
-	if err != nil {
-		c.Logger().Errorf("could not create json decoder: %+v", err)
-		return c.String(http.StatusInternalServerError, "unable to create group")
-	}
+	groupName, description := c.FormValue("name"), c.FormValue("description")
 
-	if g.Name == "" {
-		log.Println("User endpoint has no name in path")
+	if groupName == "" {
+		c.Logger().Error("group name is empty")
 		return c.String(http.StatusInternalServerError, "unable to create group")
 	}
 
@@ -45,8 +34,8 @@ func CreateGroupHandler(c echo.Context) error {
 
 	group, err := db.WriteQueries.CreateGroup(db.Ctx, db.CreateGroupParams{
 		Uuid:        groupUuid.String(),
-		Name:        g.Name,
-		Description: &g.Description,
+		Name:        groupName,
+		Description: &description,
 	})
 	if err != nil {
 		c.Logger().Errorf("could not create group in db: %+v", err)
@@ -54,5 +43,6 @@ func CreateGroupHandler(c echo.Context) error {
 	}
 
 	c.Logger().Infof("group: %+v", group)
-	return c.NoContent(200)
+
+	return c.HTML(200, "Created!")
 }

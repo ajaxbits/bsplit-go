@@ -1,0 +1,15 @@
+package views
+
+templ createTransactionModal() {
+    <button _="on click add @open to #createTransactionModal">Open the Modal</button>
+	<dialog id="createTransactionModal">
+		<article>
+			<footer>
+				<button _="on click remove @open from #createTransactionModal" className="secondary">
+					Cancel
+				</button>
+				<button>Confirm</button>
+			</footer>
+		</article>
+	</dialog>
+}

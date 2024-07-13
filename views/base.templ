@@ -18,6 +18,19 @@ templ CreateUserForm() {
 	</div>
 }
 
+templ CreateGroupForm() {
+	<div style="display: flex">
+		<form hx-post="/group" hx-target="#createGroupResult">
+			<label for="name">Name:</label>
+			<input type="text" id="name" name="name" required/>
+			<label for="description">Description</label>
+			<input type="text" id="description" name="description"/>
+			<button type="submit">Create</button>
+		</form>
+		<div id="createGroupResult"></div>
+	</div>
+}
+
 templ UsersResult(users []db.User) {
 	for _, user := range users {
 		<tr>
@@ -31,7 +44,7 @@ templ UsersResult(users []db.User) {
 templ usersTable() {
 	<h3>
 		Search Contacts
-		<span class="htmx-indicator">
+		<span>
 			Searching...
 		</span>
 	</h3>
@@ -85,16 +98,26 @@ templ Base() {
 			<meta name="color-scheme" content="light dark"/>
 			<title>Wow</title>
 			<script src="https://unpkg.com/htmx.org@2.0.0" integrity="sha384-wS5l5IKJBvK6sPTKa2WZ1js3d947pvWXbPJ1OmWfEuxLgeHcEbjUUA5i9V5ZkpCw" crossorigin="anonymous"></script>
+            <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
 			<link
 				rel="stylesheet"
-				href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.classless.violet.min.css"
+				href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.violet.min.css"
 			/>
 		</head>
 		<body>
+			<style>
+                @import url(https://fonts.bunny.net/css?family=atkinson-hyperlegible:400,400i,700,700i);
+                :root {
+                  --pico-font-family-sans-serif: 'Atkinson Hyperlegible', system-ui, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, Helvetica, Arial, "Helvetica Neue", sans-serif, var(--pico-font-family-emoji);
+                }
+            </style>
 			<main class="container">
 				@CreateUserForm()
+				@CreateGroupForm()
 				@usersTable()
 				@form()
+
+                @createTransactionModal()
 			</main>
 		</body>
 	</html>

@@ -25,12 +25,13 @@ func main() {
 		Level: 5,
 	}))
 
+
 	e.GET("/", handlers.RootHandler)
 	e.POST("/user", handlers.CreateUserHandler)
 	e.GET("/users", handlers.GetUsersHandler)
 	e.POST("/users", handlers.SearchUsersHandler)
 	e.GET("/groups", handlers.GetGroupsHandler)
-	e.PUT("/group", handlers.CreateGroupHandler)
+	e.POST("/group", handlers.CreateGroupHandler)
 	e.PUT("/txn", handlers.TransactionHandler)
 	e.POST("/split", handlers.SplitHandler)
 
