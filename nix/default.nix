@@ -20,6 +20,6 @@ buildGoApplication {
   modules = ./gomod2nix.toml;
   
   preBuild = ''
-    ${pkgs.templ}/bin/templ generate
+    TEMPL_EXPERIMENT=rawgo ${pkgs.templ}/bin/templ generate
   '';
 }

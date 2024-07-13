@@ -32,4 +32,5 @@ in
         templ
         parallel
       ]);
+    TEMPL_EXPERIMENT = "rawgo";
   }
