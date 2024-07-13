@@ -1,0 +1,12 @@
+package views
+
+templ createUserInputs() {
+	<label for="name">Name:</label>
+	<input type="text" id="name" name="name" required/>
+	<label for="venmo_id">Venmo ID:</label>
+	<input type="text" id="venmo_id" name="venmo_id"/>
+}
+
+templ createUserModal() {
+	@crudModal("/user", "createUser", createUserInputs())
+}

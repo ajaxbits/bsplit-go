@@ -5,19 +5,6 @@ import (
 	"strconv"
 )
 
-templ CreateUserForm() {
-	<div style="display: flex">
-		<form hx-post="/user" hx-target="#createUserResult">
-			<label for="name">Name:</label>
-			<input type="text" id="name" name="name" required/>
-			<label for="venmo_id">Venmo ID:</label>
-			<input type="text" id="venmo_id" name="venmo_id"/>
-			<button type="submit">Create</button>
-		</form>
-		<div id="createUserResult"></div>
-	</div>
-}
-
 templ CreateGroupForm() {
 	<div style="display: flex">
 		<form hx-post="/group" hx-target="#createGroupResult">
@@ -98,7 +85,7 @@ templ Base() {
 			<meta name="color-scheme" content="light dark"/>
 			<title>Wow</title>
 			<script src="https://unpkg.com/htmx.org@2.0.0" integrity="sha384-wS5l5IKJBvK6sPTKa2WZ1js3d947pvWXbPJ1OmWfEuxLgeHcEbjUUA5i9V5ZkpCw" crossorigin="anonymous"></script>
-            <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+			<script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
 			<link
 				rel="stylesheet"
 				href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.violet.min.css"
@@ -112,12 +99,17 @@ templ Base() {
                 }
             </style>
 			<main class="container">
-				@CreateUserForm()
-				@CreateGroupForm()
+				<header style="display: flex; flex-direction: row;">
+					<button _="on click add @open to #createUserModal">Create a user</button>
+					<div style="padding: 0em 1em;"></div>
+					<button _="on click add @open to #createGroupModal">Create a group</button>
+				</header>
+				<div id="crudResult" style="display: hidden;"></div>
+				@createUserModal()
+				@createGroupModal()
 				@usersTable()
 				@form()
-
-                @createTransactionModal()
+				@createTransactionModal()
 			</main>
 		</body>
 	</html>

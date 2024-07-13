@@ -1,0 +1,19 @@
+package views
+
+import "fmt"
+
+templ crudModal(endpoint string, modalType string, formInputs templ.Component) {
+	{{ modalId := fmt.Sprintf("%sModal", modalType) }}
+	{{ closeModalCmd := fmt.Sprintf("on click remove @open from #%s", modalId) }}
+	<dialog id={ modalId }>
+		<article>
+			<form hx-post={ endpoint } hx-target="#crudResult" hx-swap="outerHTML">
+				@formInputs
+				<button _={ closeModalCmd } className="secondary">
+					Cancel
+				</button>
+				<button className="primary" type="submit" _={ closeModalCmd }>Confirm</button>
+			</form>
+		</article>
+	</dialog>
+}
