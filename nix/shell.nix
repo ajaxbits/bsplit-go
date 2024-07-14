@@ -31,6 +31,8 @@ in
         sqlc
         templ
         parallel
+
+        jujutsu
       ]);
     TEMPL_EXPERIMENT = "rawgo";
   }
