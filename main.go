@@ -3,12 +3,14 @@ package main
 import (
 	"context"
 	_ "embed"
+	"fmt"
 	"log/slog"
 	"os"
 
 	"ajaxbits.com/bsplit/db"
 	"ajaxbits.com/bsplit/handlers"
 
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
@@ -50,7 +52,6 @@ func main() {
 		Level: 5,
 	}))
 
-
 	e.GET("/", handlers.RootHandler)
 	e.POST("/user", handlers.CreateUserHandler)
 	e.GET("/users", handlers.GetUsersHandler)
@@ -60,5 +61,13 @@ func main() {
 	e.PUT("/txn", handlers.TransactionHandler)
 	e.POST("/split", handlers.SplitHandler)
 
+	wow, err := Split(100, &EvenSplit{
+		Participants: []uuid.UUID{uuid.New(), uuid.New(), uuid.New()},
+	})
+	if err != nil {
+		panic("ack!")
+	}
+
+	fmt.Printf("%+v", wow)
 	e.Logger.Fatal(e.Start("localhost:8080"))
 }
