@@ -8,15 +8,12 @@ import (
 )
 
 type splittable interface {
-	split(total money.Money) ([]ParticipantOwed, error)
+	split(total money.Money) (ParticipantShares, error)
 }
 
-type ParticipantOwed struct {
-	UserUuid   uuid.UUID
-	AmountOwed money.Money
-}
+type ParticipantShares map[uuid.UUID]*money.Money
 
-func Split[S splittable](total int64, splitType S) ([]ParticipantOwed, error) {
+func Split[S splittable](total int64, splitType S) (ParticipantShares, error) {
 	return splitType.split(*money.New(total, money.USD))
 }
 
@@ -39,7 +36,7 @@ func scrambleSlice[T any](s []T) []T {
 	return s
 }
 
-func (s *EvenSplit) split(total money.Money) ([]ParticipantOwed, error) {
+func (s *EvenSplit) split(total money.Money) (ParticipantShares, error) {
 	shares, err := total.Split(len(s.Participants))
 	if err != nil {
 		return nil, err
@@ -50,19 +47,16 @@ func (s *EvenSplit) split(total money.Money) ([]ParticipantOwed, error) {
 
 	wow := Zip(scrambledParticipants, shares)
 
-	result := make([]ParticipantOwed, len(s.Participants))
-	for i, p := range wow {
+	result := make(ParticipantShares)
+	for _, p := range wow {
 		participantUuid, share := p.First, p.Second
-		result[i] = ParticipantOwed{
-			UserUuid:   participantUuid,
-			AmountOwed: *share,
-		}
+		result[participantUuid] = share
 	}
 
 	return result, nil
 }
 
-func (s *PercentSplit) split(total money.Money) ([]ParticipantOwed, error) {
+func (s *PercentSplit) split(total money.Money) (ParticipantShares, error) {
 	allocations := make([]int, len(*s))
 	for i, p := range *s {
 		allocations[i] = int(p.Percent)
@@ -74,22 +68,18 @@ func (s *PercentSplit) split(total money.Money) ([]ParticipantOwed, error) {
 	}
 
 	// Make sure it's kind of fair due to round-robin misalignments
-	scrambled := scrambleSlice(*s)
+	participantsScrambled := scrambleSlice(*s)
 
-	paired := Zip(scrambled, shares)
-
-	result := make([]ParticipantOwed, len(*s))
-	for i, p := range paired {
-		result[i] = ParticipantOwed{
-			UserUuid:   p.First.UserUuid,
-			AmountOwed: *p.Second,
-		}
+	result := make(ParticipantShares, len(*s))
+	for _, p := range Zip(participantsScrambled, shares) {
+		participantUuid, share := p.First.UserUuid, p.Second
+		result[participantUuid] = share
 	}
 
 	return result, nil
 }
 
-func (s *AdjustmentSplit) split(total money.Money) ([]ParticipantOwed, error) {
+func (s *AdjustmentSplit) split(total money.Money) (ParticipantShares, error) {
 	var totalAdjustment int64
 	for _, p := range *s {
 		totalAdjustment += p.Adjustment
@@ -109,12 +99,10 @@ func (s *AdjustmentSplit) split(total money.Money) ([]ParticipantOwed, error) {
 		return nil, err
 	}
 
-	result := make([]ParticipantOwed, len(*s))
-	for i, p := range Zip(scrambledParticipants, shares) {
-		result[i] = ParticipantOwed{
-			UserUuid:   p.First.UserUuid,
-			AmountOwed: *p.Second,
-		}
+	result := make(ParticipantShares, len(*s))
+	for _, p := range Zip(scrambledParticipants, shares) {
+		participantUuid, share := p.First.UserUuid, p.Second
+		result[participantUuid] = share
 	}
 
 	return result, nil

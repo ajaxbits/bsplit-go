@@ -69,7 +69,10 @@ func main() {
 	}
 
 	fmt.Println("#####")
-	fmt.Println(wow)
+	for k, v := range wow {
+		fmt.Println(k)
+		fmt.Println(v.Display())
+	}
 	fmt.Println("#####")
 
 	wow, err = Split(100, &PercentSplit{
@@ -78,7 +81,10 @@ func main() {
 	})
 
 	fmt.Println("#####")
-	fmt.Println(wow)
+	for k, v := range wow {
+		fmt.Println(k)
+		fmt.Println(v.Display())
+	}
 	fmt.Println("#####")
 
 	wow, err = Split(100, &AdjustmentSplit{
@@ -87,7 +93,10 @@ func main() {
 	})
 
 	fmt.Println("#####")
-	fmt.Println(wow)
+	for k, v := range wow {
+		fmt.Println(k)
+		fmt.Println(v.Display())
+	}
 	fmt.Println("#####")
 
 	e.Logger.Fatal(e.Start("localhost:8080"))
