@@ -68,6 +68,18 @@ func main() {
 		panic("ack!")
 	}
 
-	fmt.Printf("%+v", wow)
+	fmt.Println("#####")
+	fmt.Println(wow)
+	fmt.Println("#####")
+
+	wow, err = Split(100, &PercentSplit{
+		{UserUuid: uuid.New(), Percent: 40},
+		{UserUuid: uuid.New(), Percent: 60},
+	})
+
+	fmt.Println("#####")
+	fmt.Println(wow)
+	fmt.Println("#####")
+
 	e.Logger.Fatal(e.Start("localhost:8080"))
 }

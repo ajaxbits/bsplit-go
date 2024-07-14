@@ -31,7 +31,7 @@ type AdjustmentSplit []struct {
 }
 type PercentSplit []struct {
 	UserUuid uuid.UUID
-	Percent  int
+	Percent  int64
 }
 
 func scrambleSlice[T any](s []T) []T {
@@ -56,6 +56,33 @@ func (s *EvenSplit) split(total money.Money) ([]ParticipantOwed, error) {
 		result[i] = ParticipantOwed{
 			UserUuid:   participantUuid,
 			AmountOwed: *share,
+		}
+	}
+
+	return result, nil
+}
+
+func (s *PercentSplit) split(total money.Money) ([]ParticipantOwed, error) {
+	allocations := make([]int, len(*s))
+	for i, p := range *s {
+		allocations[i] = int(p.Percent)
+	}
+
+	shares, err := total.Allocate(allocations...)
+	if err != nil {
+		return nil, err
+	}
+
+	// Make sure it's kind of fair due to round-robin misalignments
+	scrambled := scrambleSlice(*s)
+
+	paired := Zip(scrambled, shares)
+
+	result := make([]ParticipantOwed, len(*s))
+	for i, p := range paired {
+		result[i] = ParticipantOwed{
+			UserUuid:   p.First.UserUuid,
+			AmountOwed: *p.Second,
 		}
 	}
 
