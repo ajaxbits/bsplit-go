@@ -18,4 +18,4 @@ gen:
     templ generate
     
 test:
-    go test -v ./splits/.
+    go test ./splits/. -count=1
