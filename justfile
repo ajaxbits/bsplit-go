@@ -16,3 +16,6 @@ clean:
 gen:
     sqlc generate
     templ generate
+    
+test:
+    go test -v ./splits/.

@@ -59,3 +59,29 @@ func TestAdjustmentSplit(t *testing.T) {
 		t.Errorf("got %+v, wanted %+v", got, want)
 	}
 }
+
+
+func TestPercentSplit(t *testing.T) {
+	uuid1, uuid2, uuid3 := uuid.New(), uuid.New(), uuid.New()
+	splitType := PercentSplit{
+		{UserUuid: uuid1, Percent: 30},
+		{UserUuid: uuid2, Percent: 34},
+		{UserUuid: uuid3, Percent: 36},
+	}
+	total := money.New(101, money.USD)
+
+	gotRaw, err := splitType.split(total)
+	if err != nil {
+		t.FailNow()
+	}
+
+	got := make(map[uuid.UUID]int64)
+	for u, s := range gotRaw {
+		got[u] = s.Amount()
+	}
+	want := map[uuid.UUID]int64{uuid1: 31, uuid2: 34, uuid3: 36}
+
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("got %+v, wanted %+v", got, want)
+	}
+}
