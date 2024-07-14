@@ -1,4 +1,4 @@
-package main
+package splits
 
 import (
 	"sort"
@@ -15,7 +15,7 @@ func TestEvenSplit(t *testing.T) {
 	}
 	total := money.New(100, money.USD)
 
-	gotFull, err := splitType.split(*total)
+	gotFull, err := splitType.split(total)
 	if err != nil {
 		t.FailNow()
 	}

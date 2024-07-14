@@ -3,14 +3,12 @@ package main
 import (
 	"context"
 	_ "embed"
-	"fmt"
 	"log/slog"
 	"os"
 
 	"ajaxbits.com/bsplit/db"
 	"ajaxbits.com/bsplit/handlers"
 
-	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
@@ -60,44 +58,6 @@ func main() {
 	e.POST("/group", handlers.CreateGroupHandler)
 	e.PUT("/txn", handlers.TransactionHandler)
 	e.POST("/split", handlers.SplitHandler)
-
-	wow, err := Split(100, &EvenSplit{
-		Participants: []uuid.UUID{uuid.New(), uuid.New(), uuid.New()},
-	})
-	if err != nil {
-		panic("ack!")
-	}
-
-	fmt.Println("#####")
-	for k, v := range wow {
-		fmt.Println(k)
-		fmt.Println(v.Display())
-	}
-	fmt.Println("#####")
-
-	wow, err = Split(100, &PercentSplit{
-		{UserUuid: uuid.New(), Percent: 40},
-		{UserUuid: uuid.New(), Percent: 60},
-	})
-
-	fmt.Println("#####")
-	for k, v := range wow {
-		fmt.Println(k)
-		fmt.Println(v.Display())
-	}
-	fmt.Println("#####")
-
-	wow, err = Split(100, &AdjustmentSplit{
-		{UserUuid: uuid.New(), Adjustment: 49},
-		{UserUuid: uuid.New(), Adjustment: 6},
-	})
-
-	fmt.Println("#####")
-	for k, v := range wow {
-		fmt.Println(k)
-		fmt.Println(v.Display())
-	}
-	fmt.Println("#####")
-
+	
 	e.Logger.Fatal(e.Start("localhost:8080"))
 }

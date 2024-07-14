@@ -1,4 +1,4 @@
-package main
+package splits
 
 import (
 	"math/rand"
@@ -8,13 +8,13 @@ import (
 )
 
 type splittable interface {
-	split(total money.Money) (ParticipantShares, error)
+	split(total *money.Money) (ParticipantShares, error)
 }
 
 type ParticipantShares map[uuid.UUID]*money.Money
 
-func Split[S splittable](total int64, splitType S) (ParticipantShares, error) {
-	return splitType.split(*money.New(total, money.USD))
+func Split[S splittable](total *money.Money, splitType S) (ParticipantShares, error) {
+	return splitType.split(total)
 }
 
 // Strategies
@@ -36,7 +36,7 @@ func scrambleSlice[T any](s []T) []T {
 	return s
 }
 
-func (s *EvenSplit) split(total money.Money) (ParticipantShares, error) {
+func (s *EvenSplit) split(total *money.Money) (ParticipantShares, error) {
 	shares, err := total.Split(len(s.Participants))
 	if err != nil {
 		return nil, err

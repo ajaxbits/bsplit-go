@@ -1,7 +1,7 @@
 // https://github.com/jkratz55/slices
 // LICENSE: MIT
 
-package main
+package splits
 // Pair is a type representing a pair of values
 type Pair[T, U any] struct {
 	First  T
