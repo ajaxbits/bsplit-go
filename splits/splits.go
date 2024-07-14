@@ -56,7 +56,7 @@ func (s *EvenSplit) split(total *money.Money) (ParticipantShares, error) {
 	return result, nil
 }
 
-func (s *PercentSplit) split(total money.Money) (ParticipantShares, error) {
+func (s *PercentSplit) split(total *money.Money) (ParticipantShares, error) {
 	allocations := make([]int, len(*s))
 	for i, p := range *s {
 		allocations[i] = int(p.Percent)
@@ -79,7 +79,7 @@ func (s *PercentSplit) split(total money.Money) (ParticipantShares, error) {
 	return result, nil
 }
 
-func (s *AdjustmentSplit) split(total money.Money) (ParticipantShares, error) {
+func (s *AdjustmentSplit) split(total *money.Money) (ParticipantShares, error) {
 	var totalAdjustment int64
 	for _, p := range *s {
 		totalAdjustment += p.Adjustment
