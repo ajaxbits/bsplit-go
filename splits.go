@@ -27,7 +27,7 @@ type EvenSplit struct {
 }
 type AdjustmentSplit []struct {
 	UserUuid   uuid.UUID
-	Adjustment int
+	Adjustment int64
 }
 type PercentSplit []struct {
 	UserUuid uuid.UUID
@@ -80,6 +80,37 @@ func (s *PercentSplit) split(total money.Money) ([]ParticipantOwed, error) {
 
 	result := make([]ParticipantOwed, len(*s))
 	for i, p := range paired {
+		result[i] = ParticipantOwed{
+			UserUuid:   p.First.UserUuid,
+			AmountOwed: *p.Second,
+		}
+	}
+
+	return result, nil
+}
+
+func (s *AdjustmentSplit) split(total money.Money) ([]ParticipantOwed, error) {
+	var totalAdjustment int64
+	for _, p := range *s {
+		totalAdjustment += p.Adjustment
+	}
+
+	commonShare := (total.Amount() - totalAdjustment) / int64(len(*s))
+
+	scrambledParticipants := scrambleSlice(*s)
+	adjustmentRatios := make([]int, len(*s))
+	for i, p := range scrambledParticipants {
+		adjustedShare := p.Adjustment + commonShare
+		adjustmentRatios[i] = int(adjustedShare)
+	}
+
+	shares, err := total.Allocate(adjustmentRatios...)
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]ParticipantOwed, len(*s))
+	for i, p := range Zip(scrambledParticipants, shares) {
 		result[i] = ParticipantOwed{
 			UserUuid:   p.First.UserUuid,
 			AmountOwed: *p.Second,

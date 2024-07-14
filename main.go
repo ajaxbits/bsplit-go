@@ -81,5 +81,14 @@ func main() {
 	fmt.Println(wow)
 	fmt.Println("#####")
 
+	wow, err = Split(100, &AdjustmentSplit{
+		{UserUuid: uuid.New(), Adjustment: 49},
+		{UserUuid: uuid.New(), Adjustment: 6},
+	})
+
+	fmt.Println("#####")
+	fmt.Println(wow)
+	fmt.Println("#####")
+
 	e.Logger.Fatal(e.Start("localhost:8080"))
 }
