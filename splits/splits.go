@@ -1,8 +1,6 @@
 package splits
 
 import (
-	"math/rand"
-
 	"github.com/Rhymond/go-money"
 	"github.com/google/uuid"
 )
@@ -31,24 +29,14 @@ type PercentSplit []struct {
 	Percent  int64
 }
 
-func scrambleSlice[T any](s []T) []T {
-	rand.Shuffle(len(s), func(i, j int) { s[i], s[j] = s[j], s[i] })
-	return s
-}
-
 func (s *EvenSplit) split(total *money.Money) (ParticipantShares, error) {
 	shares, err := total.Split(len(s.Participants))
 	if err != nil {
 		return nil, err
 	}
 
-	// Make sure it's kind of fair due to round-robin misalignments
-	scrambledParticipants := scrambleSlice(s.Participants)
-
-	wow := Zip(scrambledParticipants, shares)
-
 	result := make(ParticipantShares)
-	for _, p := range wow {
+	for _, p := range Zip(s.Participants, shares) {
 		participantUuid, share := p.First, p.Second
 		result[participantUuid] = share
 	}
@@ -67,11 +55,8 @@ func (s *PercentSplit) split(total *money.Money) (ParticipantShares, error) {
 		return nil, err
 	}
 
-	// Make sure it's kind of fair due to round-robin misalignments
-	participantsScrambled := scrambleSlice(*s)
-
 	result := make(ParticipantShares, len(*s))
-	for _, p := range Zip(participantsScrambled, shares) {
+	for _, p := range Zip(*s, shares) {
 		participantUuid, share := p.First.UserUuid, p.Second
 		result[participantUuid] = share
 	}
@@ -87,9 +72,8 @@ func (s *AdjustmentSplit) split(total *money.Money) (ParticipantShares, error) {
 
 	commonShare := (total.Amount() - totalAdjustment) / int64(len(*s))
 
-	scrambledParticipants := scrambleSlice(*s)
 	adjustmentRatios := make([]int, len(*s))
-	for i, p := range scrambledParticipants {
+	for i, p := range *s {
 		adjustedShare := p.Adjustment + commonShare
 		adjustmentRatios[i] = int(adjustedShare)
 	}
@@ -100,7 +84,7 @@ func (s *AdjustmentSplit) split(total *money.Money) (ParticipantShares, error) {
 	}
 
 	result := make(ParticipantShares, len(*s))
-	for _, p := range Zip(scrambledParticipants, shares) {
+	for _, p := range Zip(*s, shares) {
 		participantUuid, share := p.First.UserUuid, p.Second
 		result[participantUuid] = share
 	}
