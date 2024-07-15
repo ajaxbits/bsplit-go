@@ -10,7 +10,7 @@ import (
 
 func TestEvenSplit(t *testing.T) {
 	t.Parallel()
-	
+
 	uuid1, uuid2, uuid3 := uuid.New(), uuid.New(), uuid.New()
 	splitType := EvenSplit{
 		Participants: uuid.UUIDs{uuid1, uuid2, uuid3},
@@ -39,12 +39,12 @@ func TestEvenSplit(t *testing.T) {
 
 func TestAdjustmentSplit(t *testing.T) {
 	t.Parallel()
-	
+
 	uuid1, uuid2, uuid3 := uuid.New(), uuid.New(), uuid.New()
 	splitType := AdjustmentSplit{
-		{UserUuid: uuid1, Adjustment: 49},
-		{UserUuid: uuid2, Adjustment: 18},
-		{UserUuid: uuid3, Adjustment: 0},
+		{UserUuid: uuid1, Adjustment: money.New(49, money.USD)},
+		{UserUuid: uuid2, Adjustment: money.New(18, money.USD)},
+		{UserUuid: uuid3, Adjustment: money.New(0, money.USD)},
 	}
 	total := money.New(100, money.USD)
 
@@ -67,7 +67,7 @@ func TestAdjustmentSplit(t *testing.T) {
 
 func TestPercentSplit(t *testing.T) {
 	t.Parallel()
-	
+
 	uuid1, uuid2, uuid3 := uuid.New(), uuid.New(), uuid.New()
 	splitType := PercentSplit{
 		{UserUuid: uuid1, Percent: 30},

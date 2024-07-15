@@ -22,7 +22,7 @@ type EvenSplit struct {
 }
 type AdjustmentSplit []struct {
 	UserUuid   uuid.UUID
-	Adjustment int64
+	Adjustment *money.Money
 }
 type PercentSplit []struct {
 	UserUuid uuid.UUID
@@ -65,17 +65,25 @@ func (s *PercentSplit) split(total *money.Money) (ParticipantShares, error) {
 }
 
 func (s *AdjustmentSplit) split(total *money.Money) (ParticipantShares, error) {
-	var totalAdjustment int64
+	totalAdjustment := money.New(0, total.Currency().Code)
 	for _, p := range *s {
-		totalAdjustment += p.Adjustment
+		totalAdjustmentNew, err := totalAdjustment.Add(p.Adjustment)
+		if err != nil {
+			return nil, err
+		}
+		totalAdjustment = totalAdjustmentNew
 	}
 
-	commonShare := (total.Amount() - totalAdjustment) / int64(len(*s))
+	commonShareInt := (total.Amount() - totalAdjustment.Amount()) / int64(len(*s))
+	commonShare := money.New(commonShareInt, total.Currency().Code)
 
 	adjustmentRatios := make([]int, len(*s))
 	for i, p := range *s {
-		adjustedShare := p.Adjustment + commonShare
-		adjustmentRatios[i] = int(adjustedShare)
+		adjustedShare, err := p.Adjustment.Add(commonShare)
+		if err != nil {
+			return nil, err
+		}
+		adjustmentRatios[i] = int(adjustedShare.Amount())
 	}
 
 	shares, err := total.Allocate(adjustmentRatios...)

@@ -75,10 +75,10 @@ func SplitHandler(c echo.Context) error {
 
 			adjustmentSplit := struct {
 				UserUuid   uuid.UUID
-				Adjustment int64
+				Adjustment *money.Money
 			}{
 				UserUuid:   user,
-				Adjustment: int64(adjustment)}
+				Adjustment: money.New(int64(adjustment), money.USD)}
 			data = append(data, adjustmentSplit)
 		}
 		shares, splitErr = splits.Split(money.NewFromFloat(total, money.USD), &data)
