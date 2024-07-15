@@ -79,7 +79,7 @@ func TransactionHandler(c echo.Context) error {
 			return c.String(http.StatusInternalServerError, "unable to create transaction")
 		}
 	}
-	
+
 	err = tx.Commit()
 	if err != nil {
 		c.Logger().Errorf("could not commit db transaction: %+v", err)

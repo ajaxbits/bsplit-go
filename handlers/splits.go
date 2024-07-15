@@ -65,6 +65,23 @@ func SplitHandler(c echo.Context) error {
 			data = append(data, percentSplit)
 		}
 		shares, splitErr = splits.Split(money.NewFromFloat(total, money.USD), &data)
+	case "exactSplit":
+		data := make(splits.ExactSplit, 0, len(participantUuids))
+		pairs := splits.Zip(participantUuids, strings.Split(formData["exacts"][0], ","))
+		for _, p := range pairs {
+			user, amountStr := p.First, p.Second
+			amount, err := strconv.Atoi(amountStr)
+			splitErr = err
+
+			exactSplit := struct {
+				UserUuid uuid.UUID
+				Amount   *money.Money
+			}{
+				UserUuid: user,
+				Amount:   money.New(int64(amount), money.USD)}
+			data = append(data, exactSplit)
+		}
+		shares, splitErr = splits.Split(money.NewFromFloat(total, money.USD), &data)
 	case "adjustmentSplit":
 		data := make(splits.AdjustmentSplit, 0, len(participantUuids))
 		pairs := splits.Zip(participantUuids, strings.Split(formData["adjustments"][0], ","))

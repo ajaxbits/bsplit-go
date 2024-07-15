@@ -28,6 +28,10 @@ type PercentSplit []struct {
 	UserUuid uuid.UUID
 	Percent  int64
 }
+type ExactSplit []struct {
+	UserUuid uuid.UUID
+	Amount   *money.Money
+}
 
 func (s *EvenSplit) split(total *money.Money) (ParticipantShares, error) {
 	shares, err := total.Split(len(s.Participants))
@@ -48,6 +52,26 @@ func (s *PercentSplit) split(total *money.Money) (ParticipantShares, error) {
 	allocations := make([]int, len(*s))
 	for i, p := range *s {
 		allocations[i] = int(p.Percent)
+	}
+
+	shares, err := total.Allocate(allocations...)
+	if err != nil {
+		return nil, err
+	}
+
+	result := make(ParticipantShares, len(*s))
+	for _, p := range Zip(*s, shares) {
+		participantUuid, share := p.First.UserUuid, p.Second
+		result[participantUuid] = share
+	}
+
+	return result, nil
+}
+
+func (s *ExactSplit) split(total *money.Money) (ParticipantShares, error) {
+	allocations := make([]int, len(*s))
+	for i, p := range *s {
+		allocations[i] = int(p.Amount.Amount())
 	}
 
 	shares, err := total.Allocate(allocations...)

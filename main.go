@@ -58,6 +58,6 @@ func main() {
 	e.POST("/group", handlers.CreateGroupHandler)
 	e.PUT("/txn", handlers.TransactionHandler)
 	e.POST("/split", handlers.SplitHandler)
-	
+
 	e.Logger.Fatal(e.Start("localhost:8080"))
 }

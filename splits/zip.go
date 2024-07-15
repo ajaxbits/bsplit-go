@@ -2,6 +2,7 @@
 // LICENSE: MIT
 
 package splits
+
 // Pair is a type representing a pair of values
 type Pair[T, U any] struct {
 	First  T
