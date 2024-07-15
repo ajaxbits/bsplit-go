@@ -1,8 +1,6 @@
 package views
 
-import (
-	"ajaxbits.com/bsplit/db"
-)
+import "ajaxbits.com/bsplit/db"
 
 templ CreateGroupForm() {
 	<div style="display: flex">
@@ -56,24 +54,134 @@ templ usersTable() {
 	</table>
 }
 
+css flexRow() {
+	display: flex;
+	flex-direction: row;
+}
+
 templ form() {
 	<form hx-post="/split" hx-target="#result">
-		<label for="total">Total Expense:</label>
-		<input type="text" id="total" name="total"/>
-		<label for="participants">Number of Participants:</label>
-		<input type="number" id="participants" name="participants"/>
+		<fieldset class={ flexRow }>
+			<legend>Split Type:</legend>
+			<div>
+				<input
+					type="radio"
+					id="evenSplit"
+					name="splitType"
+					value="evenSplit"
+					class="splitType"
+					_="on change show #evenSplitFields
+					             hide #adjustmentSplitFields
+								 hide #percentSplitFields
+								 hide #exactSplitFields
+					"
+				/>
+				<label for="evenSplit">Even</label>
+			</div>
+			<div>
+				<input
+					type="radio"
+					id="percentSplit"
+					name="splitType"
+					value="percentSplit"
+					class="splitType"
+					_="on change show #percentSplitFields
+					             hide #evenSplitFields
+								 hide #adjustmentSplitFields
+								 hide #exactSplitFields
+					"
+				/>
+				<label for="percentSplit">Percent</label>
+			</div>
+			<div>
+				<input
+					type="radio"
+					id="adjustmentSplit"
+					name="splitType"
+					value="adjustmentSplit"
+					class="splitType"
+					_="on change show #adjustmentSplitFields
+					             hide #evenSplitFields
+								 hide #percentSplitFields
+								 hide #exactSplitFields
+					"
+				/>
+				<label for="adjustmentSplit">Adjustment</label>
+			</div>
+			<div>
+				<input
+					type="radio"
+					id="exactSplit"
+					name="splitType"
+					value="exactSplit"
+					class="splitType"
+					_="on change show #exactSplitFields
+					             hide #evenSplitFields
+								 hide #percentSplitFields
+								 hide #adjustmentSplitFields
+					"
+				/>
+				<label for="exactSplit">Exact</label>
+			</div>
+		</fieldset>
+		@evenSplitFields()
+		@adjustmentSplitFields()
+		@percentSplitFields()
+		@exactSplitFields()
 		<button type="submit">Split</button>
 	</form>
 	<div id="result"></div>
 }
 
+templ evenSplitFields() {
+	<fieldset style="display: none;" id="evenSplitFields">
+		<label for="total">Total Expense:</label>
+		<input type="text" id="total" name="total"/>
+		<label for="participants">Number of Participants:</label>
+		<input type="number" id="participants" name="participants"/>
+	</fieldset>
+}
+
+templ adjustmentSplitFields() {
+	<fieldset style="display: none;" id="adjustmentSplitFields">
+		<label for="total">Total Expense:</label>
+		<input type="text" id="total" name="total"/>
+		<label for="participants">Number of Participants:</label>
+		<input type="number" id="participants" name="participants"/>
+		<label for="adjustments">Adjustments (comma-separated)</label>
+		<input type="text" id="adjustments" name="adjustments"/>
+	</fieldset>
+}
+
+templ percentSplitFields() {
+	<fieldset style="display: none;" id="percentSplitFields">
+		<label for="total">Total Expense:</label>
+		<input type="text" id="total" name="total"/>
+		<label for="participants">Number of Participants:</label>
+		<input type="number" id="participants" name="participants"/>
+		<label for="percents">Percentages (comma-separated)</label>
+		<input type="text" id="percents" name="percents"/>
+	</fieldset>
+}
+
+templ exactSplitFields() {
+	<fieldset style="display: none;" id="exactSplitFields">
+		<label for="total">Total Expense:</label>
+		<input type="text" id="total" name="total"/>
+		<label for="participants">Number of Participants:</label>
+		<input type="number" id="participants" name="participants"/>
+		<label for="exacts">Exact values (comma-separated)</label>
+		<input type="text" id="exacts" name="exacts"/>
+	</fieldset>
+}
+
 templ Result(result map[string]string) {
-    <p>Split results are:</p>
-    <ul>
-    for user, amount := range result {
-        <li>User { user } pays { amount }</li>
-    }
-    </ul>
+	<p>Split results are:</p>
+	<ul>
+		for user, amount := range result {
+			<li>User { user } pays { amount }</li>
+		}
+	</ul>
 }
 
 templ TransactionForm() {
@@ -136,18 +244,16 @@ templ Base() {
 			<title>Wow</title>
 			<script src="https://unpkg.com/htmx.org@2.0.0" integrity="sha384-wS5l5IKJBvK6sPTKa2WZ1js3d947pvWXbPJ1OmWfEuxLgeHcEbjUUA5i9V5ZkpCw" crossorigin="anonymous"></script>
 			<script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
-			<link
-				rel="stylesheet"
-				href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.violet.min.css"
-			/>
+			<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.violet.min.css"/>
 		</head>
 		<body>
 			<style>
-                @import url(https://fonts.bunny.net/css?family=atkinson-hyperlegible:400,400i,700,700i);
-                :root {
-                  --pico-font-family-sans-serif: 'Atkinson Hyperlegible', system-ui, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, Helvetica, Arial, "Helvetica Neue", sans-serif, var(--pico-font-family-emoji);
-                }
-            </style>
+        @import url(https://fonts.bunny.net/css?family=atkinson-hyperlegible:400,400i,700,700i);
+
+        :root {
+            --pico-font-family-sans-serif: 'Atkinson Hyperlegible', system-ui, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, Helvetica, Arial, "Helvetica Neue", sans-serif, var(--pico-font-family-emoji);
+        }
+    </style>
 			<main class="container">
 				<header style="display: flex; flex-direction: row;">
 					<button _="on click add @open to #createUserModal">Create a user</button>
