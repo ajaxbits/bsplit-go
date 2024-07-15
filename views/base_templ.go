@@ -180,7 +180,7 @@ func form() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><legend>Split Type:</legend><div><input type=\"radio\" id=\"evenSplit\" name=\"splitType\" value=\"evenSplit\" class=\"splitType\" _=\"on change show #evenSplitFields\n\t\t\t\t\t             hide #adjustmentSplitFields\n\t\t\t\t\t\t\t\t hide #percentSplitFields\n\t\t\t\t\t\t\t\t hide #exactSplitFields\n\t\t\t\t\t\"> <label for=\"evenSplit\">Even</label></div><div><input type=\"radio\" id=\"percentSplit\" name=\"splitType\" value=\"percentSplit\" class=\"splitType\" _=\"on change show #percentSplitFields\n\t\t\t\t\t             hide #evenSplitFields\n\t\t\t\t\t\t\t\t hide #adjustmentSplitFields\n\t\t\t\t\t\t\t\t hide #exactSplitFields\n\t\t\t\t\t\"> <label for=\"percentSplit\">Percent</label></div><div><input type=\"radio\" id=\"adjustmentSplit\" name=\"splitType\" value=\"adjustmentSplit\" class=\"splitType\" _=\"on change show #adjustmentSplitFields\n\t\t\t\t\t             hide #evenSplitFields\n\t\t\t\t\t\t\t\t hide #percentSplitFields\n\t\t\t\t\t\t\t\t hide #exactSplitFields\n\t\t\t\t\t\"> <label for=\"adjustmentSplit\">Adjustment</label></div><div><input type=\"radio\" id=\"exactSplit\" name=\"splitType\" value=\"exactSplit\" class=\"splitType\" _=\"on change show #exactSplitFields\n\t\t\t\t\t             hide #evenSplitFields\n\t\t\t\t\t\t\t\t hide #percentSplitFields\n\t\t\t\t\t\t\t\t hide #adjustmentSplitFields\n\t\t\t\t\t\"> <label for=\"exactSplit\">Exact</label></div></fieldset>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><legend>Split Type:</legend><div><input type=\"radio\" id=\"evenSplit\" name=\"splitType\" value=\"evenSplit\" class=\"splitType\" _=\"on change show #evenSplitFields\n\t\t\t\t\t             hide #adjustmentSplitFields\n\t\t\t\t\t\t\t\t hide #percentSplitFields\n\t\t\t\t\t\t\t\t hide #exactSplitFields\n\t\t\t\t\t\"> <label for=\"evenSplit\">Even</label></div><div><input type=\"radio\" id=\"percentSplit\" name=\"splitType\" value=\"percentSplit\" class=\"splitType\" _=\"on change show #percentSplitFields\n\t\t\t\t\t             hide #evenSplitFields\n\t\t\t\t\t\t\t\t hide #adjustmentSplitFields\n\t\t\t\t\t\t\t\t hide #exactSplitFields\n\t\t\t\t\t\"> <label for=\"percentSplit\">Percent</label></div><div><input type=\"radio\" id=\"adjustmentSplit\" name=\"splitType\" value=\"adjustmentSplit\" class=\"splitType\" _=\"on change show #adjustmentSplitFields\n\t\t\t\t\t             hide #evenSplitFields\n\t\t\t\t\t\t\t\t hide #percentSplitFields\n\t\t\t\t\t\t\t\t hide #exactSplitFields\n\t\t\t\t\t\"> <label for=\"adjustmentSplit\">Adjustment</label></div><div><input type=\"radio\" id=\"exactSplit\" name=\"splitType\" value=\"exactSplit\" class=\"splitType\" _=\"on change show #exactSplitFields\n\t\t\t\t\t             hide #evenSplitFields\n\t\t\t\t\t\t\t\t hide #percentSplitFields\n\t\t\t\t\t\t\t\t hide #adjustmentSplitFields\n\t\t\t\t\t\"> <label for=\"exactSplit\">Exact</label></div></fieldset><label for=\"total\">Total Expense:</label> <input type=\"text\" id=\"total\" name=\"total\"> <label for=\"participants\">Number of Participants:</label> <input type=\"number\" id=\"participants\" name=\"participants\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -226,7 +226,7 @@ func evenSplitFields() templ.Component {
 			templ_7745c5c3_Var10 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<fieldset style=\"display: none;\" id=\"evenSplitFields\"><label for=\"total\">Total Expense:</label> <input type=\"text\" id=\"total\" name=\"total\"> <label for=\"participants\">Number of Participants:</label> <input type=\"number\" id=\"participants\" name=\"participants\"></fieldset>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<fieldset style=\"display: none;\" id=\"evenSplitFields\"></fieldset>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -252,7 +252,7 @@ func adjustmentSplitFields() templ.Component {
 			templ_7745c5c3_Var11 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<fieldset style=\"display: none;\" id=\"adjustmentSplitFields\"><label for=\"total\">Total Expense:</label> <input type=\"text\" id=\"total\" name=\"total\"> <label for=\"participants\">Number of Participants:</label> <input type=\"number\" id=\"participants\" name=\"participants\"> <label for=\"adjustments\">Adjustments (comma-separated)</label> <input type=\"text\" id=\"adjustments\" name=\"adjustments\"></fieldset>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<fieldset style=\"display: none;\" id=\"adjustmentSplitFields\"><label for=\"adjustments\">Adjustments (comma-separated)</label> <input type=\"text\" id=\"adjustments\" name=\"adjustments\"></fieldset>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -278,7 +278,7 @@ func percentSplitFields() templ.Component {
 			templ_7745c5c3_Var12 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<fieldset style=\"display: none;\" id=\"percentSplitFields\"><label for=\"total\">Total Expense:</label> <input type=\"text\" id=\"total\" name=\"total\"> <label for=\"participants\">Number of Participants:</label> <input type=\"number\" id=\"participants\" name=\"participants\"> <label for=\"percents\">Percentages (comma-separated)</label> <input type=\"text\" id=\"percents\" name=\"percents\"></fieldset>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<fieldset style=\"display: none;\" id=\"percentSplitFields\"><label for=\"percents\">Percentages (comma-separated)</label> <input type=\"text\" id=\"percents\" name=\"percents\"></fieldset>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -304,7 +304,7 @@ func exactSplitFields() templ.Component {
 			templ_7745c5c3_Var13 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<fieldset style=\"display: none;\" id=\"exactSplitFields\"><label for=\"total\">Total Expense:</label> <input type=\"text\" id=\"total\" name=\"total\"> <label for=\"participants\">Number of Participants:</label> <input type=\"number\" id=\"participants\" name=\"participants\"> <label for=\"exacts\">Exact values (comma-separated)</label> <input type=\"text\" id=\"exacts\" name=\"exacts\"></fieldset>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<fieldset style=\"display: none;\" id=\"exactSplitFields\"><label for=\"exacts\">Exact values (comma-separated)</label> <input type=\"text\" id=\"exacts\" name=\"exacts\"></fieldset>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -342,7 +342,7 @@ func Result(result map[string]string) templ.Component {
 			var templ_7745c5c3_Var15 string
 			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(user)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/base.templ`, Line: 182, Col: 18}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/base.templ`, Line: 170, Col: 18}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {
@@ -355,7 +355,7 @@ func Result(result map[string]string) templ.Component {
 			var templ_7745c5c3_Var16 string
 			templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(amount)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/base.templ`, Line: 182, Col: 34}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/base.templ`, Line: 170, Col: 34}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 			if templ_7745c5c3_Err != nil {

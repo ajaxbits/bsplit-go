@@ -124,6 +124,10 @@ templ form() {
 				<label for="exactSplit">Exact</label>
 			</div>
 		</fieldset>
+		<label for="total">Total Expense:</label>
+		<input type="text" id="total" name="total"/>
+		<label for="participants">Number of Participants:</label>
+		<input type="number" id="participants" name="participants"/>
 		@evenSplitFields()
 		@adjustmentSplitFields()
 		@percentSplitFields()
@@ -135,19 +139,11 @@ templ form() {
 
 templ evenSplitFields() {
 	<fieldset style="display: none;" id="evenSplitFields">
-		<label for="total">Total Expense:</label>
-		<input type="text" id="total" name="total"/>
-		<label for="participants">Number of Participants:</label>
-		<input type="number" id="participants" name="participants"/>
 	</fieldset>
 }
 
 templ adjustmentSplitFields() {
 	<fieldset style="display: none;" id="adjustmentSplitFields">
-		<label for="total">Total Expense:</label>
-		<input type="text" id="total" name="total"/>
-		<label for="participants">Number of Participants:</label>
-		<input type="number" id="participants" name="participants"/>
 		<label for="adjustments">Adjustments (comma-separated)</label>
 		<input type="text" id="adjustments" name="adjustments"/>
 	</fieldset>
@@ -155,10 +151,6 @@ templ adjustmentSplitFields() {
 
 templ percentSplitFields() {
 	<fieldset style="display: none;" id="percentSplitFields">
-		<label for="total">Total Expense:</label>
-		<input type="text" id="total" name="total"/>
-		<label for="participants">Number of Participants:</label>
-		<input type="number" id="participants" name="participants"/>
 		<label for="percents">Percentages (comma-separated)</label>
 		<input type="text" id="percents" name="percents"/>
 	</fieldset>
@@ -166,10 +158,6 @@ templ percentSplitFields() {
 
 templ exactSplitFields() {
 	<fieldset style="display: none;" id="exactSplitFields">
-		<label for="total">Total Expense:</label>
-		<input type="text" id="total" name="total"/>
-		<label for="participants">Number of Participants:</label>
-		<input type="number" id="participants" name="participants"/>
 		<label for="exacts">Exact values (comma-separated)</label>
 		<input type="text" id="exacts" name="exacts"/>
 	</fieldset>
